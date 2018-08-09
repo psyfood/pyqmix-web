@@ -35,6 +35,14 @@ MANIFEST
 pip-log.txt
 pip-delete-this-directory.txt
 
+# .idea
+pyqmix_backend/.idea
+pyqmix_frontend/.idea
+
+# Single files
+Project overview.txt
+pyqmix_web.yml
+
 # Unit test / coverage reports
 htmlcov/
 .tox/
