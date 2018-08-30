@@ -15,7 +15,7 @@ class PumpForm extends Component {
     pumps: [],  // Pump parameters received from backend
     isPumpConfigSetUp: false,  // Are the pumps set up in the backend
     userEnteredPumpConfig: false,
-    smallestSyringeSize: "",  // COULD make sense to make into a function!
+    smallestSyringeSize: "",
     dllFileLocation: "",
     configFileLocation: "",
 
@@ -32,8 +32,13 @@ class PumpForm extends Component {
     maximallyAllowedVolumeUnitAsSpecifiedInForm: "",
 
     // Flow rate
-    flowRate: [],
-    flowUnit: "mL/s",
+    flowRate: [],  // Input from user
+    flowUnit: "mL/s",  // Input from user
+    flowMilliLitresPerSecond: [],  // Standardized flow rate sent to backend
+    flowUnitConversionFactorToMilliLitresPerMinute: 1, // standard is mL
+    flowRateValueInFormUnitAsSpecifiedInForm: [],
+    maximallyAllowedFlowRateMilliLitresPerSecond: [],
+    maximallyAllowedFlowRateUnitAsSpecifiedInForm: "",
 
     // Modals
     modal: {
@@ -86,33 +91,28 @@ class PumpForm extends Component {
   };
 
   // Updates FLOW-related parts of the state by input fields and standardize to the unit: mL, which the backend runs
-  handleFlowRateChange = (e) => this.setState({flowRate: e.target.value});
-  handleFlowUnitChange = (e) => this.setState({flowUnit: e.target.value});
-
-  computeFlowMilliLitresPerSecond = () => {
-    let flowRate = this.state.flowRate;
-    let factor = this.computeConversionFactorOfFlowUnitToMilliLitres(this.state.flowUnit);
-    return flowRate * factor;
+  handleFlowRateChange = async (e) => {
+    let flowRate = e.target.value;
+    await this.setState({flowRate: flowRate});
+    this.setState({flowRateValueInFormUnitAsSpecifiedInForm: flowRate});
+    this.setFlowMilliLitresPerSecondState();
   };
 
-  computeMaximallyAllowedFlowRateMilliLitresPerSecond = () => {
-    if (this.state.selectedPumps.length > 0) {
-      let selectedPumps = this.state.pumps.filter((e) => this.state.selectedPumps.includes(e.pump_id));
-      let pumpWithMinFlowRate = selectedPumps.sort((x, y) => y.max_flow_rate - x.max_flow_rate).pop();
-      return pumpWithMinFlowRate.max_flow_rate;
-    } else {return 0}
+  // handleFlowUnitChange = async (e) => {
+  //   await this.makeConversionFactorOfFlowUnitToMilliLitres(e.target.value);
+  //   this.setFlowMilliLitresPerSecondState();
+  //   this.maximumFlowRate();
+  // };
+  //
+
+  handleFlowUnitChange = async (e) => {
+    let factor = await this.computeConversionFactorOfFlowUnitToMilliLitres(e.target.value);
+    this.setFlowMilliLitresPerSecondState();
+    this.maximumFlowRate();
   };
 
-  computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm = () => {
-    if (this.state.selectedPumps.length > 0) {
-      let maxAllowedFlow = this.computeMaximallyAllowedFlowRateMilliLitresPerSecond();
-      let factor = this.computeConversionFactorOfFlowUnitToMilliLitres(this.state.flowUnit);
 
-      return (maxAllowedFlow / factor).toString();
-    } else {return ""}
-  };
-
-  computeConversionFactorOfFlowUnitToMilliLitres = (e) => {
+  makeConversionFactorOfFlowUnitToMilliLitres = async (e) => {
     let factor;
     switch (e) {
       case "mL/s":
@@ -130,22 +130,14 @@ class PumpForm extends Component {
       default:
         console.log('An unknown flow-rate unit was used')
     }
-    return factor;
+    this.setState({flowUnitConversionFactorToMilliLitresPerMinute: factor})
   };
 
-  checkFlowRateInput = () => {
-    if (this.computeMaximallyAllowedFlowRateMilliLitresPerSecond() < this.computeFlowMilliLitresPerSecond()) {
-      console.log('Maximum flow rate exceeded, setting flow rate to maximum allowed value');
-      let flowRateFlow = parseFloat(this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm());
-      this.setState({flowRate: flowRateFlow})
-    }
-
-    if (this.computeFlowMilliLitresPerSecond() < 0) {
-      console.log('Flow rate cannot be negative. Setting flow rate to zero.');
-      this.setState({flowRate: 0})
-    }
+  setFlowMilliLitresPerSecondState = () => {
+    let flowRate = this.state.flowRate;
+    let factor = this.state.flowUnitConversionFactorToMilliLitresPerMinute;
+    this.setState({flowMilliLitresPerSecond: flowRate * factor});
   };
-
 
   // Open and close individual modals
   toggle = (modalType) => {
@@ -165,6 +157,7 @@ class PumpForm extends Component {
     this.setState({ selectedPumps: [...this.state.selectedPumps] },
       () => {
         this.minimumSyringeVolume();
+        this.maximumFlowRate();
       }
     );
   };
@@ -386,6 +379,7 @@ class PumpForm extends Component {
 
     // Update what the maximally allowed fill level and flow rate
     await this.minimumSyringeVolume();
+    await this.maximumFlowRate();
 
     let pumpCommand;
     let targetVolume;
@@ -403,7 +397,14 @@ class PumpForm extends Component {
         targetVolume = this.state.pumps[PumpName].syringe_volume
       }
 
-      let flowRate = this.computeFlowMilliLitresPerSecond();
+      // Check that flow rate is maximally the allowed flow rate
+      // Should not be necessary any longer as the input is checked
+      let flowRate;
+      let maxAllowedFlow = this.state.maximallyAllowedFlowRateMilliLitresPerSecond;
+      let selectedFlowRate = this.state.flowMilliLitresPerSecond;
+      if (selectedFlowRate > maxAllowedFlow) {
+        flowRate = maxAllowedFlow
+      } else {flowRate = selectedFlowRate}
 
       pumpCommand = {
         'action': action,
@@ -480,6 +481,65 @@ class PumpForm extends Component {
     return new Promise(resolve => this.setState(stateNameChange, resolve))
   };
 
+  maximumFlowRate = async () => {
+
+    if (this.state.selectedPumps.length > 0) {
+      let selectedPumps = this.state.pumps.filter( (e) => this.state.selectedPumps.includes(e.pump_id) );
+      let pumpWithMinFlowRate = selectedPumps.sort((x, y) => y.max_flow_rate - x.max_flow_rate).pop();
+      let slowestFlowRate = pumpWithMinFlowRate.max_flow_rate;
+      await this.asyncSetState({maximallyAllowedFlowRateMilliLitresPerSecond: slowestFlowRate});
+      console.log('Maximum allowed flow rate of selected syringes is now: ' + slowestFlowRate.toString() + 'mL');
+
+      let maximallyAllowedFlowRateUnitAsSpecifiedInForm = slowestFlowRate / this.state.flowUnitConversionFactorToMilliLitresPerMinute;
+      await this.asyncSetState({maximallyAllowedFlowRateUnitAsSpecifiedInForm: maximallyAllowedFlowRateUnitAsSpecifiedInForm.toString()});
+    } else {this.setState({maximallyAllowedFlowRateUnitAsSpecifiedInForm: ""})}
+
+  };
+
+  checkFlowRateInput = () => {
+    if (this.state.maximallyAllowedFlowRateMilliLitresPerSecond < this.state.flowMilliLitresPerSecond) {
+      this.setState({flowMilliLitresPerSecond: this.state.maximallyAllowedFlowRateMilliLitresPerSecond});
+      console.log('Maximum flow rate exceeded, setting flow rate to maximum allowed value');
+      let flowRateFlow = parseFloat(this.state.maximallyAllowedFlowRateUnitAsSpecifiedInForm);
+      this.setState({flowRateValueInFormUnitAsSpecifiedInForm: flowRateFlow})
+    }
+
+    if (this.state.flowMilliLitresPerSecond < 0) {
+      this.setState({flowMilliLitresPerSecond: 0});
+      console.log('Flow rate cannot be negative. Setting flow rate to zero.');
+      this.setState({flowRateValueInFormUnitAsSpecifiedInForm: 0})
+    }
+  };
+
+
+  // computeflowRateValueInFormUnitAsSpecifiedInForm = () => {
+  //
+  //
+  //
+  //   return flowRateFlow
+  // };
+
+  computeConversionFactorOfFlowUnitToMilliLitres = async (e) => {
+    let factor;
+    switch (e) {
+      case "mL/s":
+        factor = 1;
+        break;
+      case "cL/s":
+        factor = 10;
+        break;
+      case "mL/min":
+        factor = 1/60;
+        break;
+      case "cL/min":
+        factor = 1/6;
+        break;
+      default:
+        console.log('An unknown flow-rate unit was used')
+    }
+    return factor;
+  };
+
 
 
   checkRepetitionInput = () => {
@@ -489,6 +549,13 @@ class PumpForm extends Component {
   };
 
 
+  // ADJUST FOR VOLUME !!!
+  checkVolumeInput = () => {
+    if (this.state.maximallyAllowedFlowRateMilliLitresPerSecond < this.state.flowMilliLitresPerSecond) {
+      this.setState({flowMilliLitresPerSecond: this.state.maximallyAllowedFlowRateMilliLitresPerSecond});
+      console.log('Maximum flow rate exceeded, setting flow rate to maximum allowed value');
+    }
+  };
 
   render = () => {
     return (
@@ -665,12 +732,12 @@ class PumpForm extends Component {
 
                 <div className="col-sm-3 input-subform flowrate-subform">
                   <Input type="number"
-                         value={this.state.flowRate}
+                         value={this.state.flowRateValueInFormUnitAsSpecifiedInForm}
                          pattern="\d+((\.)\d+)?"
                          step="any"
                          name="flowRate"
                          min="0"
-                         max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm()}
+                         max={this.state.maximallyAllowedFlowRateUnitAsSpecifiedInForm}
                          placeholder="Flow rate."
                          onChange={this.handleFlowRateChange}
                          onBlur={this.checkFlowRateInput}
@@ -739,7 +806,7 @@ class PumpForm extends Component {
                          step="any"
                          name="flowRate"
                          min="0"
-                         max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm()}
+                         max={this.state.maximallyAllowedFlowRateUnitAsSpecifiedInForm}
                          placeholder="Flow rate."
                          onChange={this.handleFlowRateChange}
                          required/>
@@ -823,7 +890,7 @@ class PumpForm extends Component {
                          step="any"
                          name="flowRate"
                          min="0"
-                         max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm()}
+                         max={this.state.maximallyAllowedFlowRateUnitAsSpecifiedInForm}
                          placeholder="Flow rate."
                          onChange={this.handleFlowRateChange}
                          required/>
@@ -891,7 +958,7 @@ class PumpForm extends Component {
                          step="any"
                          name="flowRate"
                          min="0"
-                         max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm()}
+                         max={this.state.maximallyAllowedFlowRateUnitAsSpecifiedInForm}
                          placeholder="Flow rate."
                          onChange={this.handleFlowRateChange}
                          required/>
