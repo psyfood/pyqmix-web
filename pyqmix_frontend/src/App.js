@@ -7,21 +7,37 @@ import './App.css';
 
 class PumpForm extends Component {
   state = {
+
+    // System setup
     webConnectedToPumps: false,  // Does the website think the pumps are connected (based on user-input, not backend)
     detectedPumps: [],  // List of pump_ID's detected in system
-    selectedPumps: [],  // pump_ID's selected by user. Index of pumps in state.pumps.
-    isPumpConfigSetUp: false,
+    selectedPumps: [],  // Pump_ID's selected by user. Defined by index of pumps in state.pumps.
+    pumps: [],  // Pump parameters received from backend
+    isPumpConfigSetUp: false,  // Are the pumps set up in the backend
     userEnteredPumpConfig: false,
-    pumps: [],
-    nbRep: 0,
+    smallestSyringeSize: "",
+    dllFileLocation: "",
+    configFileLocation: "",
+
+    // Repetitions
+    repetitions: [],
+
+    // Volume
     targetVolume: [],
     volumeUnit: "mL",
     targetVolumeMilliLitres: [],
     volumeUnitConversionFactorToMilliLitres: 1,  // standard is mL
+
+    // Flow rate
     flowRate: [],
     flowUnit: "mL/s",
     flowMilliLitresPerSecond: [],
     flowUnitConversionFactorToMilliLitresPerMinute: 1, // standard is mL
+    flowRateValueInFormUnitAsSpecifiedInForm: [],
+    maximallyAllowedFlowRateMilliLitresPerSecond: [],
+    maximallyAllowedFlowRateUnitAsSpecifiedInForm: "",
+
+    // Modals
     modal: {
       'referenceMove': false,
       'fill': false,
@@ -31,17 +47,15 @@ class PumpForm extends Component {
       'bubbleCycleEnd': false,
       'locateConfigFiles': false
     },
-    smallestSyringeSize: "",
-    maximallyAllowedFlowRateMilliLitresPerSecond: [],
-    slowestFlowRateUnitAsSpecifiedInForm: "",
-    dllFileLocation: "",
-    configFileLocation: ""
   };
 
   // Update state by input-fields
-  handleRepetitionsChange = (e) => this.setState({nbRep: e.target.value});
   handledllFileLocationChange = (e) => this.setState({dllFileLocation: e.target.value});
   handleConfigFileLocationChange = (e) => this.setState({configFileLocation: e.target.value});
+
+  handleRepetitionsChange = (e) => {
+    this.setState({repetitions: e.target.value})
+  };
 
   // Update VOLUME-related parts of the state by input fields and standardize to the unit: mL, which the backend runs
   handleTargetVolumeChange = async (e) => {
@@ -76,9 +90,11 @@ class PumpForm extends Component {
     this.setState({targetVolumeMilliLitres: volume * factor});
   };
 
-  // Update FLOW-related parts of the state by input fields and standardize to the unit: mL, which the backend runs
+  // Updates FLOW-related parts of the state by input fields and standardize to the unit: mL, which the backend runs
   handleFlowRateChange = async (e) => {
-    await this.setState({flowRate: e.target.value});
+    let flowRate = e.target.value;
+    await this.setState({flowRate: flowRate});
+    this.setState({flowRateValueInFormUnitAsSpecifiedInForm: flowRate});
     this.setFlowMilliLitresPerSecondState();
   };
 
@@ -258,7 +274,7 @@ class PumpForm extends Component {
 
     // Iterate over repetitions
     let repIndex;
-    for (repIndex = 1; repIndex < this.state.nbRep; repIndex++ ) {
+    for (repIndex = 1; repIndex < this.state.repetitions; repIndex++ ) {
 
       // Empty syringes
       this.sendCommmandToPumps('empty');
@@ -281,7 +297,7 @@ class PumpForm extends Component {
 
     // Iterate over repetitions
     let repIndex;
-    for (repIndex = 1; repIndex < this.state.nbRep; repIndex++ ) {
+    for (repIndex = 1; repIndex < this.state.repetitions; repIndex++ ) {
 
       // Set pumps to fill level
       this.sendCommmandToPumps('fill');
@@ -325,7 +341,7 @@ class PumpForm extends Component {
 
     // Iterate over repetitions
     let repIndex;
-    for (repIndex = 0; repIndex < this.state.nbRep; repIndex++ ) {
+    for (repIndex = 0; repIndex < this.state.repetitions; repIndex++ ) {
 
       // Empty syringes
       this.sendCommmandToPumps('empty');
@@ -477,10 +493,40 @@ class PumpForm extends Component {
       await this.asyncSetState({maximallyAllowedFlowRateMilliLitresPerSecond: slowestFlowRate});
       console.log('Maximum allowed flow rate of selected syringes is now: ' + slowestFlowRate.toString() + 'mL');
 
-      let slowestFlowRateUnitAsSpecifiedInForm = slowestFlowRate / this.state.flowUnitConversionFactorToMilliLitresPerMinute;
-      await this.asyncSetState({slowestFlowRateUnitAsSpecifiedInForm: slowestFlowRateUnitAsSpecifiedInForm.toString()});
-    } else {this.setState({slowestFlowRateUnitAsSpecifiedInForm: "5"})}
+      let maximallyAllowedFlowRateUnitAsSpecifiedInForm = slowestFlowRate / this.state.flowUnitConversionFactorToMilliLitresPerMinute;
+      await this.asyncSetState({maximallyAllowedFlowRateUnitAsSpecifiedInForm: maximallyAllowedFlowRateUnitAsSpecifiedInForm.toString()});
+    } else {this.setState({maximallyAllowedFlowRateUnitAsSpecifiedInForm: ""})}
 
+  };
+
+  checkFlowRateInput = () => {
+    if (this.state.maximallyAllowedFlowRateMilliLitresPerSecond < this.state.flowMilliLitresPerSecond) {
+      this.setState({flowMilliLitresPerSecond: this.state.maximallyAllowedFlowRateMilliLitresPerSecond});
+      console.log('Maximum flow rate exceeded, setting flow rate to maximum allowed value');
+      let flowRateFlow = parseFloat(this.state.maximallyAllowedFlowRateUnitAsSpecifiedInForm);
+      this.setState({flowRateValueInFormUnitAsSpecifiedInForm: flowRateFlow})
+    }
+
+    if (this.state.flowMilliLitresPerSecond < 0) {
+      this.setState({flowMilliLitresPerSecond: 0});
+      console.log('Flow rate cannot be negative. Setting flow rate to zero.');
+      this.setState({flowRateValueInFormUnitAsSpecifiedInForm: 0})
+    }
+  };
+
+  checkRepetitionInput = () => {
+    if (this.state.repetitions < 1) {
+      this.setState({repetitions: 1});
+    }
+  };
+
+
+  // ADJUST FOR VOLUME !!!
+  checkVolumeInput = () => {
+    if (this.state.maximallyAllowedFlowRateMilliLitresPerSecond < this.state.flowMilliLitresPerSecond) {
+      this.setState({flowMilliLitresPerSecond: this.state.maximallyAllowedFlowRateMilliLitresPerSecond});
+      console.log('Maximum flow rate exceeded, setting flow rate to maximum allowed value');
+    }
   };
 
   render = () => {
@@ -628,10 +674,12 @@ class PumpForm extends Component {
 
                 <div className="col-sm-3 input-subform nrep-subform">
                   <Input type="number"
-                         name="nbRepetitions"
+                         value={this.state.repetitions}
+                         name="repetitions"
                          min="1"
                          placeholder="No. of repetitions."
                          onChange={this.handleRepetitionsChange}
+                         onBlur={this.checkRepetitionInput}
                          required/>
                 </div>
 
@@ -656,16 +704,19 @@ class PumpForm extends Component {
 
                 <div className="col-sm-3 input-subform flowrate-subform">
                   <Input type="number"
+                         value={this.state.flowRateValueInFormUnitAsSpecifiedInForm}
                          pattern="\d+((\.)\d+)?"
                          step="any"
                          name="flowRate"
                          min="0"
-                         max={this.state.slowestFlowRateUnitAsSpecifiedInForm}
+                         max={this.state.maximallyAllowedFlowRateUnitAsSpecifiedInForm}
                          placeholder="Flow rate."
                          onChange={this.handleFlowRateChange}
+                         onBlur={this.checkFlowRateInput}
                          required/>
                   <Input type="select"
                          name="flowUnit"
+                         onBlur={this.checkFlowRateInput}
                          onChange={this.handleFlowUnitChange}>
                     <option value={this.state.flowUnit}>{this.state.flowUnit}</option>
                     <option value="mL/min">mL/min</option>
@@ -710,7 +761,7 @@ class PumpForm extends Component {
 
                 <div className="col-sm-3 input-subform nrep-subform">
                   <Input type="number"
-                         name="nbRepetitions"
+                         name="repetitions"
                          min="1"
                          placeholder="No. of repetitions."
                          onChange={this.handleRepetitionsChange}
@@ -727,7 +778,7 @@ class PumpForm extends Component {
                          step="any"
                          name="flowRate"
                          min="0"
-                         max={this.state.slowestFlowRateUnitAsSpecifiedInForm}
+                         max={this.state.maximallyAllowedFlowRateUnitAsSpecifiedInForm}
                          placeholder="Flow rate."
                          onChange={this.handleFlowRateChange}
                          required/>
@@ -811,7 +862,7 @@ class PumpForm extends Component {
                          step="any"
                          name="flowRate"
                          min="0"
-                         max={this.state.slowestFlowRateUnitAsSpecifiedInForm}
+                         max={this.state.maximallyAllowedFlowRateUnitAsSpecifiedInForm}
                          placeholder="Flow rate."
                          onChange={this.handleFlowRateChange}
                          required/>
@@ -862,7 +913,7 @@ class PumpForm extends Component {
 
                 <div className="col-sm-3 input-subform nrep-subform">
                   <Input type="number"
-                         name="nbRepetitions"
+                         name="repetitions"
                          min="1"
                          placeholder="No. of repetitions."
                          onChange={this.handleRepetitionsChange}
@@ -879,7 +930,7 @@ class PumpForm extends Component {
                          step="any"
                          name="flowRate"
                          min="0"
-                         max={this.state.slowestFlowRateUnitAsSpecifiedInForm}
+                         max={this.state.maximallyAllowedFlowRateUnitAsSpecifiedInForm}
                          placeholder="Flow rate."
                          onChange={this.handleFlowRateChange}
                          required/>
