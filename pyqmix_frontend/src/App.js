@@ -15,7 +15,7 @@ class PumpForm extends Component {
     pumps: [],  // Pump parameters received from backend
     isPumpConfigSetUp: false,  // Are the pumps set up in the backend
     userEnteredPumpConfig: false,
-    smallestSyringeSize: "",  // COULD make sense to make into a function!
+    // smallestSyringeSize: "",
     dllFileLocation: "",
     configFileLocation: "",
 
@@ -25,11 +25,10 @@ class PumpForm extends Component {
     // Volume
     targetVolume: [],
     volumeUnit: "mL",
+
+    // Remove !
     targetVolumeMilliLitres: [],
-    volumeUnitConversionFactorToMilliLitres: 1,  // standard is mL
-    volumeInFormUnitAsSpecifiedInForm: [],
-    maximallyAllowedVolumeMilliLitres: [],
-    maximallyAllowedVolumeUnitAsSpecifiedInForm: "",
+    // volumeUnitConversionFactorToMilliLitres: 1,  // standard is mL
 
     // Flow rate
     flowRate: [],
@@ -53,18 +52,26 @@ class PumpForm extends Component {
   handleRepetitionsChange = (e) => this.setState({repetitions: e.target.value});
 
   // Update VOLUME-related parts of the state by input fields and standardize to the unit: mL, which the backend runs
-  handleTargetVolumeChange = async (e) => {
-    await this.setState({targetVolume: e.target.value});
-    this.setVolumeMilliLitresState();
-  };
+  handleTargetVolumeChange = (e) => this.setState({targetVolume: e.target.value});
+  handleVolumeUnitChange = (e) => this.setState({volumeUnit: e.target.value});
 
-  handleVolumeUnitChange = async (e) => {
-    await this.makeConversionFactorOfVolumeUnitToMilliLitres(e.target.value);
-    this.setVolumeMilliLitresState();
-    this.minimumSyringeVolume();
-  };
+  // makeConversionFactorOfVolumeUnitToMilliLitres = async (e) => {
+  //   let factor;
+  //   switch (e) {
+  //     case "mL":
+  //       factor = 1;
+  //       break;
+  //     case "cL":
+  //       factor = 10;
+  //       break;
+  //     default:
+  //       console.log('An unknown volume unit was used')
+  //   }
+  //   this.setState({volumeUnitConversionFactorToMilliLitres: factor});
+  // };
 
-  makeConversionFactorOfVolumeUnitToMilliLitres = async (e) => {
+  computeConversionFactorOfVolumeUnitToMilliLitres = (e) => {
+
     let factor;
     switch (e) {
       case "mL":
@@ -76,14 +83,39 @@ class PumpForm extends Component {
       default:
         console.log('An unknown volume unit was used')
     }
-    this.setState({volumeUnitConversionFactorToMilliLitres: factor});
+    return factor
   };
 
-  setVolumeMilliLitresState = () => {
+  computeVolumeMilliLitres = () => {
+
     let volume = this.state.targetVolume;
-    let factor = this.state.volumeUnitConversionFactorToMilliLitres;
-    this.setState({targetVolumeMilliLitres: volume * factor});
+    let factor = this.computeConversionFactorOfVolumeUnitToMilliLitres(this.state.volumeUnit);
+    return volume * factor;
   };
+
+  // CHECK VOLUME
+  computeMaximallyAllowedVolumeUnitAsSpecifiedInForm = () => {
+    if (this.state.selectedPumps.length > 0) {
+      let maxAllowedVolume = this.computeSmallestSyringeVolumeMilliLitres();
+      let factor = this.computeConversionFactorOfVolumeUnitToMilliLitres(this.state.volumeUnit);
+
+      return (maxAllowedVolume / factor);
+    } else {return []}
+  };
+
+  checkTargetVolumeInput = () => {
+    if (this.computeSmallestSyringeVolumeMilliLitres() < this.computeVolumeMilliLitres()) {
+      console.log('Maximum volume exceeded, setting flow rate to maximum allowed value');
+      let targetVolume = this.computeMaximallyAllowedVolumeUnitAsSpecifiedInForm();
+      this.setState({targetVolume: targetVolume})
+    }
+
+    if (this.computeVolumeMilliLitres() < 0) {
+      console.log('Volume cannot be negative. Setting target volume to zero.');
+      this.setState({targetVolume: 0})
+    }
+  };
+
 
   // Updates FLOW-related parts of the state by input fields and standardize to the unit: mL, which the backend runs
   handleFlowRateChange = (e) => this.setState({flowRate: e.target.value});
@@ -162,11 +194,7 @@ class PumpForm extends Component {
     } else {
       this.state.selectedPumps.splice(index, 1);
     }
-    this.setState({ selectedPumps: [...this.state.selectedPumps] },
-      () => {
-        this.minimumSyringeVolume();
-      }
-    );
+    this.setState({ selectedPumps: [...this.state.selectedPumps] });
   };
 
   // Checks whether the bus is ready to be initialized
@@ -385,7 +413,7 @@ class PumpForm extends Component {
   makePumpCommand = async (action, PumpName) => {
 
     // Update what the maximally allowed fill level and flow rate
-    await this.minimumSyringeVolume();
+    // await this.minimumSyringeVolume();
 
     let pumpCommand;
     let targetVolume;
@@ -396,7 +424,7 @@ class PumpForm extends Component {
 
       // If the command is fillToLevel, empty, or fill
       if (action === 'fillToLevel') {
-        targetVolume = this.state.targetVolumeMilliLitres;
+        targetVolume = this.computeVolumeMilliLitres();
       } else if (action === 'empty') {
         targetVolume = 0;
       } else if (action === 'fill') {
@@ -462,18 +490,29 @@ class PumpForm extends Component {
     return json;
   };
 
-  // Function needs to be updated so it considers volume unit
-  minimumSyringeVolume = () => {
+  // minimumSyringeVolume = () => {
+  //
+  //   if (this.state.selectedPumps.length > 0) {
+  //     let selectedPumps = this.state.pumps.filter( (e) => this.state.selectedPumps.includes(e.pump_id) );
+  //     let pumpWithMinSyringeSize = selectedPumps.sort((x, y) => y.syringe_volume - x.syringe_volume).pop();
+  //     let smallestSyringeSize = pumpWithMinSyringeSize.syringe_volume;
+  //     smallestSyringeSize = smallestSyringeSize / this.computeConversionFactorOfVolumeUnitToMilliLitres();
+  //     console.log('Maximum allowed volume of selected syringes is now: ' + smallestSyringeSize.toString());
+  //     this.setState({smallestSyringeSize: smallestSyringeSize.toString()})
+  //   } else {this.setState({smallestSyringeSize: "300"})}
+  // };
 
+    // Function needs to be updated so it considers volume unit
+  computeSmallestSyringeVolumeMilliLitres = () => {
     if (this.state.selectedPumps.length > 0) {
       let selectedPumps = this.state.pumps.filter( (e) => this.state.selectedPumps.includes(e.pump_id) );
       let pumpWithMinSyringeSize = selectedPumps.sort((x, y) => y.syringe_volume - x.syringe_volume).pop();
       let smallestSyringeSize = pumpWithMinSyringeSize.syringe_volume;
-      smallestSyringeSize = smallestSyringeSize / this.state.volumeUnitConversionFactorToMilliLitres;
-      console.log('Maximum allowed volume of selected syringes is now: ' + smallestSyringeSize.toString());
-      this.setState({smallestSyringeSize: smallestSyringeSize.toString()})
-    } else {this.setState({smallestSyringeSize: "300"})}
+      let smallestSyringeSizeMilliLitres = smallestSyringeSize / this.computeConversionFactorOfVolumeUnitToMilliLitres(this.state.volumeUnit);
+      return smallestSyringeSizeMilliLitres.toString();
+    } else {return ""}
   };
+
 
   asyncSetState = (stateNameChange) => {
 
@@ -646,18 +685,22 @@ class PumpForm extends Component {
 
                 <div className="col-sm-3 input-subform volume-subform">
                   <Input type="number"
+                         value={this.state.targetVolume}
                          pattern="\d+((\.)\d+)?"
                          step="any"
                          name="targetVolume"
                          min="0"
-                         max={this.state.smallestSyringeSize}
+                         max={this.computeSmallestSyringeVolumeMilliLitres()}
                          placeholder="Target volume."
                          onChange={this.handleTargetVolumeChange}
+                         onBlur={this.checkTargetVolumeInput}
                          required/>
                   <Input type="select"
                          name="volumeUnit"
+                         defaultValue={this.state.volumeUnit}
+                         onBlur={this.checkTargetVolumeInput}
                          onChange={this.handleVolumeUnitChange}>
-                    <option value={this.state.volumeUnit}>{this.state.volumeUnit}</option>
+                    <option value="mL">mL</option>
                     <option value="cL">cL</option>
                   </Input>
                 </div>
@@ -677,9 +720,10 @@ class PumpForm extends Component {
                          required/>
                   <Input type="select"
                          name="flowUnit"
+                         defaultValue={this.state.flowUnit}
                          onBlur={this.checkFlowRateInput}
                          onChange={this.handleFlowUnitChange}>
-                    <option value={this.state.flowUnit}>{this.state.flowUnit}</option>
+                    <option value="mL/s">mL/s</option>
                     <option value="mL/min">mL/min</option>
                     <option value="cL/s">cL/s</option>
                     <option value="cL/min">cL/min</option>
@@ -745,8 +789,9 @@ class PumpForm extends Component {
                          required/>
                   <Input type="select"
                          name="flowUnit"
+                         defaultValue={this.state.flowUnit}
                          onChange={this.handleFlowUnitChange}>
-                    <option value={this.state.flowUnit}>{this.state.flowUnit}</option>
+                    <option value="mL/s">mL/s</option>
                     <option value="mL/min">mL/min</option>
                     <option value="cL/s">cL/s</option>
                     <option value="cL/min">cL/min</option>
@@ -804,14 +849,15 @@ class PumpForm extends Component {
                          step="any"
                          name="targetVolume"
                          min="0"
-                         max={this.state.smallestSyringeSize}
+                         max={this.computeSmallestSyringeVolumeMilliLitres()}
                          placeholder="Target volume."
                          onChange={this.handleTargetVolumeChange}
                          required/>
                   <Input type="select"
                          name="flowUnit"
+                         defaultValue={this.state.volumeUnit}
                          onChange={this.handleVolumeUnitChange}>
-                    <option value={this.state.volumeUnit}>{this.state.volumeUnit}</option>
+                    <option value="mL">mL</option>
                     <option value="cL">cL</option>
                   </Input>
                 </div>
@@ -829,8 +875,9 @@ class PumpForm extends Component {
                          required/>
                   <Input type="select"
                          name="flowUnit"
+                         defaultValue={this.state.flowUnit}
                          onChange={this.handleFlowUnitChange}>
-                    <option value={this.state.flowUnit}>{this.state.flowUnit}</option>
+                    <option value="mL/s">mL/s</option>
                     <option value="mL/min">mL/min</option>
                     <option value="cL/s">cL/s</option>
                     <option value="cL/min">cL/min</option>
@@ -897,8 +944,9 @@ class PumpForm extends Component {
                          required/>
                   <Input type="select"
                          name="flowUnit"
+                         defaultValue={this.state.flowUnit}
                          onChange={this.handleFlowUnitChange}>
-                    <option value={this.state.flowUnit}>{this.state.flowUnit}</option>
+                    <option value="mL/s">mL/s</option>
                     <option value="mL/min">mL/min</option>
                     <option value="cL/s">cL/s</option>
                     <option value="cL/min">cL/min</option>
