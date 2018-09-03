@@ -19,7 +19,7 @@ flow_param = OrderedDict([('prefix', 'milli'),
 
 ## --- Choose session type --- ##
 app.config.from_object(__name__)
-app.config['test_session'] = True
+app.config['test_session'] = False
 app.secret_key = 'secret_key'
 
 ## --- Flask-RESTPlus models --- ##
@@ -85,9 +85,12 @@ class InitiateOrDisconnectPumps(Resource):
         for pump_id in session_paramters['pumps']:
             pump_state = get_pump_state(pump_id)
             pump_states.append(pump_state)
+        print('123')
+        print(pump_states)
 
         # Return status of pump-setup
         config_setup = is_config_set_up()
+        print(f'Is config set up: {config_setup}')
 
         system_state = {'config_setup': config_setup, 'pump_states': pump_states}
 
@@ -95,6 +98,7 @@ class InitiateOrDisconnectPumps(Resource):
 
     @api.expect(initiate_or_disconnect_pumps)
     def put(self):
+
         payload = request.json
         initiate_pumps = payload['pumpInitiate']
         print(f'Initiate pumps: {initiate_pumps}')
@@ -122,8 +126,7 @@ class Pumps(Resource):
 
         if action == 'referenceMove':
             pump_reference_move(pump_id)
-        elif action == 'empty' or action == 'fill' or action == 'fillToLevel':
-            pump_id = session_paramters['pumps'][pump_id]
+        elif action == 'empty' or action == 'fill' or action == 'fillToLevel' or action == 'fillToOneThird' or action == 'fillToTwoThird':
             target_volume = payload['params']['targetVolume']
             flow_rate = payload['params']['flowRate']
 
@@ -147,6 +150,7 @@ def is_config_set_up():
         else:
             return True
 
+
 def set_up_config(dll_dir, config_dir):
 
     if app.config['test_session']:
@@ -166,9 +170,14 @@ def connect_pumps():
         session_paramters['bus'] = 'I am a Qmix Bus.'
         return True
     else:
+        if session_paramters['bus']:
+            # Bus is already connected
+            return True
         try:
+            print('Initializing bus')
             session_paramters['bus'] = QmixBus()
             nb_pumps = QmixPump(index=0).n_pumps
+            print(f'number of pumps: {nb_pumps}')
             pumps_id = [str(i) for i in range(0, nb_pumps)]
             pump_objects = [QmixPump(index=pump_index) for pump_index in range(0, nb_pumps)]
             session_paramters['pumps'] = dict(zip(pumps_id, pump_objects))
@@ -182,8 +191,7 @@ def connect_pumps():
 def disconnect_pumps():
 
     if not app.config['test_session']:
-        bus = session_paramters['bus']
-        bus.close()
+        session_paramters['bus'].close()
 
     print(f'Bus before "closing": {session_paramters["bus"]}')
     session_paramters['bus'] = None
@@ -195,25 +203,23 @@ def disconnect_pumps():
 
 def get_pump_state(pump_id):
 
-    pump = session_paramters['pumps'][pump_id]
+    pump = session_paramters['pumps'][str(pump_id)]
 
     if app.config['test_session']:
         pump_status = {
             'pump_id': pump_id,
             'is_pumping': session_paramters['get_pumps_states_call_count'] % 5 != 0,
             'fill_level': 20,
-            'volume_unit': 'mL',
             'name': 'Midpressure 3',
-            'syringe_volume': 25,
-            'max_flow_rate': 2.5,
-            'syringe_volume_unit': 'mL'}
+            'max_flow_rate': 2.5}
 
     else:
         pump_status = {
-            'index': pump_id,
-            'max_flow_rate': pump.max_flow_rate,
+            'pump_id': pump_id,
             'is_pumping': pump.is_pumping,
             'fill_level': pump.fill_level,
+            'max_flow_rate': pump.max_flow_rate,
+            'syringe_volume': pump.volume_max,
             'name': pump.name}
 
     return pump_status
@@ -225,7 +231,15 @@ def pump_set_fill_level(pump_id, target_volume, flow_rate):
               f'target_volume to {target_volume} mL '
               f'at {flow_rate} mL/s')
     else:
-        session_paramters['pumps'][str(pump_id)].set_fill_level(level=target_volume, flow_rate=flow_rate)
+        print(f'Starting pump: {pump_id} and setting '
+              f'target_volume to {target_volume} mL '
+              f'at {flow_rate} mL/s')
+        print('test')
+        print(session_paramters['pumps'])
+        print(session_paramters['pumps']['2'])
+        print(session_paramters['pumps']['0'])
+
+        session_paramters['pumps'][str(pump_id)].set_fill_level(level=target_volume, flow_rate=flow_rate, blocking_wait=False)
 
 def pump_reference_move(pump_id):
 
@@ -253,7 +267,8 @@ def standardize_syringe_parameter(pump_id):
         # Need this as an input instead!
         pump.set_syringe_params(inner_diameter_mm=23.0329,
                                 max_piston_stroke_mm=60)
-
+        # Alternative function
+        # pump.set_syringe_params_by_type(syringe_type='25 mL glass')
 
 if __name__ == '__main__':
     app.run()

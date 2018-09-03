@@ -11,7 +11,7 @@ class PumpForm extends Component {
     // System setup
     webConnectedToPumps: false,  // Does the website think the pumps are connected (based on user-input, not backend)
     isPumpConfigSetUp: false,  // Are the pumps set up in the backend
-    userEnteredPumpConfig: false,
+    userEnteredPumpConfigPaths: false,  // Method to wait for dll and config user input
     dllFileLocation: "",
     configFileLocation: "",
 
@@ -71,7 +71,7 @@ class PumpForm extends Component {
   handleConfigFileLocationChange = (e) => this.setState({configFileLocation: e.target.value});
   handleLocatingConfig = () => {
     this.toggle('locateConfigFiles');
-    this.setState({userEnteredPumpConfig: !this.state.userEnteredPumpConfig})
+    this.setState({userEnteredPumpConfigPaths: true})
   };
 
   // --- Open and close individual modals --- //
@@ -246,12 +246,14 @@ class PumpForm extends Component {
   handlePumpConfiguration = async (e) => {
     console.log('Is pump configuration set up already?: ' + this.state.isPumpConfigSetUp);
 
-    // Ask backend whether the pump configuration is set up
+    // Update state on whether the pump configuration is set up if it's not already registered in the state
     if (this.state.isPumpConfigSetUp === false) {
-      await this.getPumpStates()
+      await this.getPumpStates();
+      console.log('retrieving pump states from backend');
+      console.log(this.state.isPumpConfigSetUp)
     }
 
-    // User must set up the pump configuration if it was not set up in the backend
+    // User must set up the pump configuration if it was not set up in the backend (only if the user has pressed detect pumps)
     if (this.state.isPumpConfigSetUp === false && this.state.webConnectedToPumps === false) {
       console.log('Pump configuration was not set up in the backend. User needs to set it up.');
 
@@ -272,7 +274,7 @@ class PumpForm extends Component {
         body: JSON.stringify(payload)
       });
     }
-    this.setState({userEnteredPumpConfig: false}); // reset state
+    this.setState({userEnteredPumpConfigPaths: false}); // reset state
     this.handleConnectPumps();
   };
 
@@ -280,14 +282,14 @@ class PumpForm extends Component {
   waitForConfigFilesToBeSet = async () => {
     do {
       await new Promise(resolve => setTimeout(resolve, 200));
-    } while (this.state.userEnteredPumpConfig === false);
+    } while (this.state.userEnteredPumpConfigPaths === false);
   };
 
-  // Detect pumps and return a list of them
-  handleConnectPumps = (e) => {
+  // Detect pumps and return a list of them, or disconnect pumps
+  handleConnectPumps = () => {
     this.setState({webConnectedToPumps: !this.state.webConnectedToPumps},
       async () => {
-        let payload = {pumpInitiate: this.state.webConnectedToPumps};
+        let payload = {pumpInitiate: this.state.webConnectedToPumps};  // message to connect or disconnect pumps
         console.log('Will try to connect to pumps: ' + payload['pumpInitiate'].toString());
         const response = await fetch('/api/pumps', {
           method: 'put',
@@ -302,10 +304,15 @@ class PumpForm extends Component {
 
         // Pumps were successfully connected
         if (status && payload['pumpInitiate']) {
-          await this.getPumpStates(e);
+          await this.getPumpStates();
         }
         // Pumps were unsuccesfully connected
         else if (status === false && payload['pumpInitiate']) {
+          console.log('Pumps were unsuccessfully connected. ' +
+            'Make sure all bus connections to the pumps are closed.');
+          console.log('Am I here?');
+          console.log(status);
+          console.log(payload['pumpInitiate']);
           this.setState({webConnectedToPumps: !this.state.webConnectedToPumps});
           this.setState({selectedPumps: []});
           this.setState({pumps: []});
@@ -327,44 +334,44 @@ class PumpForm extends Component {
   };
 
   // --- Fill pumps --- //
-  handleFill = () => {
+  handleFill = async () => {
 
     // To remove the modal
     this.toggle('fill');
 
     // Set pumps to fill level
-    this.sendCommmandToPumps('fillToLevel');
+    await this.sendCommmandToPumps('fillToLevel');
 
     // Iterate over repetitions
     let repIndex;
     for (repIndex = 1; repIndex < this.getActiveRepetition(this.state.activeSubform); repIndex++ ) {
 
       // Empty syringes
-      this.sendCommmandToPumps('empty');
+      await this.sendCommmandToPumps('empty');
 
       // Set pumps to fill level
-      this.sendCommmandToPumps('fillToLevel');
+      await this.sendCommmandToPumps('fillToLevel');
     }
   };
 
   // --- Empty syringes --- //
-  handleEmpty = () => {
+  handleEmpty = async () => {
 
     // To remove the modal
     this.toggle('empty');
 
     // Empty syringes
-    this.sendCommmandToPumps('empty');
+    await this.sendCommmandToPumps('empty');
 
     // Iterate over repetitions
     let repIndex;
     for (repIndex = 1; repIndex < this.getActiveRepetition(this.state.activeSubform); repIndex++ ) {
 
       // Set pumps to fill level
-      this.sendCommmandToPumps('fill');
+      await this.sendCommmandToPumps('fill');
 
       // Empty syringes
-      this.sendCommmandToPumps('empty');
+      await this.sendCommmandToPumps('empty');
     }
   };
 
@@ -375,7 +382,7 @@ class PumpForm extends Component {
     this.toggle('bubbleCycleStart');
 
     // Fill with stimulus
-    this.sendCommmandToPumps('fillToOneThird');
+    await this.sendCommmandToPumps('fillToOneThird');
 
     await this.waitForPumpingToFinish();
     this.toggle('bubbleCycleMiddle');
@@ -387,30 +394,30 @@ class PumpForm extends Component {
     this.toggle('bubbleCycleMiddle');
 
     // Fill in air
-    this.sendCommmandToPumps('fillToTwoThird');
+    await this.sendCommmandToPumps('fillToTwoThird');
 
     // Empty syringes
-    this.sendCommmandToPumps('empty');
+    await this.sendCommmandToPumps('empty');
 
     await this.waitForPumpingToFinish();
     this.toggle('bubbleCycleEnd');
   };
 
-  handleBubbleCycleEnd = () => {
+  handleBubbleCycleEnd = async () => {
     this.toggle('bubbleCycleEnd');
 
     // Fill in stimulus
-    this.sendCommmandToPumps('fill');
+    await this.sendCommmandToPumps('fill');
 
     // Fill in stimulus
-    this.sendCommmandToPumps('empty');
+    await this.sendCommmandToPumps('empty');
 
     // Finish up by filling to level
-    this.sendCommmandToPumps('fillToLevel');
+    await this.sendCommmandToPumps('fillToLevel');
   };
 
   // --- Rinse syringes --- //
-  handleRinse = () => {
+  handleRinse = async () => {
 
     // To remove the modal
     this.toggle('rinse');
@@ -420,13 +427,13 @@ class PumpForm extends Component {
     for (repIndex = 0; repIndex < this.getActiveRepetition(this.state.activeSubform); repIndex++ ) {
 
       // Empty syringes
-      this.sendCommmandToPumps('empty');
+      await this.sendCommmandToPumps('empty');
 
       // Fill syringes
-      this.sendCommmandToPumps('fill');
+      await this.sendCommmandToPumps('fill');
 
       // Empty syringes
-      this.sendCommmandToPumps('empty');
+      await this.sendCommmandToPumps('empty');
     }
   };
 
@@ -470,11 +477,21 @@ class PumpForm extends Component {
       } else if (pumpAction === 'fill') {
         targetVolume = this.state.pumps[PumpName].syringe_volume
       } else if (pumpAction === 'fillToOneThird')  {
+        console.log('ooooo');
+        console.log(pumpAction);
         let pump = this.state.pumps.find(p => p.pump_id === PumpName);
+        console.log(pump);
+        console.log(PumpName);
         targetVolume = pump.syringe_volume * 1/3;
+        console.log(targetVolume);
       } else if (pumpAction === 'fillToTwoThird') {
+        console.log('ppppp');
+        console.log(pumpAction);
         let pump = this.state.pumps.find(p => p.pump_id === PumpName);
+        console.log(pump);
+        console.log(PumpName);
         targetVolume = pump.syringe_volume * 2/3;
+        console.log(targetVolume);
       }
 
       let flowRate = this.computeFlowMilliLitresPerSecond(this.state.activeSubform);
@@ -495,12 +512,12 @@ class PumpForm extends Component {
     do {
       console.log('Checking whether pumps are still pumping');
       await this.getPumpStates();
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 200));
     } while (this.state.pumps.some(x => x.is_pumping));
   };
 
   // --- Ask backend for pump state --- //
-  getPumpStates = async (e) => {
+  getPumpStates = async () => {
     const response = await fetch('/api/pumps', {
       method: 'get',
       headers: {
@@ -577,7 +594,7 @@ class PumpForm extends Component {
                   <Input
                     className="text-area-input"
                     onChange={this.handledllFileLocationChange}
-                    placeholder="C:/Users/au278141/AppData/Local/QmixSDK"
+                    placeholder="C:/Users/username/AppData/Local/QmixSDK"
                     name="text"
                     id="exampleText" />
                 </FormGroup>
@@ -730,7 +747,6 @@ class PumpForm extends Component {
                 </div>
               </div>
             </FormGroup>
-
           </Form>
 
 
@@ -804,7 +820,6 @@ class PumpForm extends Component {
                 </div>
               </div>
             </FormGroup>
-
           </Form>
 
           {/*BUBBLE CYCLE FORM*/}
@@ -909,9 +924,7 @@ class PumpForm extends Component {
               </div>
             </FormGroup>
           </Form>
-
-
-
+          
           {/*RINSE FORM*/}
           <Form method="post"
                 onSubmit={(e) => {

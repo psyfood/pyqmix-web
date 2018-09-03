@@ -14,7 +14,7 @@ class PumpForm extends Component {
     selectedPumps: [],  // Pump_ID's selected by user. Defined by index of pumps in state.pumps.
     pumps: [],  // Pump parameters received from backend
     isPumpConfigSetUp: false,  // Are the pumps set up in the backend
-    userEnteredPumpConfig: false,
+    userEnteredPumpConfigPaths: false,
     smallestSyringeSize: "",
     dllFileLocation: "",
     configFileLocation: "",
@@ -193,7 +193,7 @@ class PumpForm extends Component {
         body: JSON.stringify(payload)
       });
     }
-    this.setState({userEnteredPumpConfig: false}); // reset state
+    this.setState({userEnteredPumpConfigPaths: false}); // reset state
     this.handleConnectPumps();
   };
 
@@ -205,7 +205,7 @@ class PumpForm extends Component {
 
   handleLocatingConfig = () => {
     this.toggle('locateConfigFiles');
-    this.setState({userEnteredPumpConfig: !this.state.userEnteredPumpConfig})
+    this.setState({userEnteredPumpConfigPaths: !this.state.userEnteredPumpConfig})
   };
 
   // Detect pumps and return a list of them
