@@ -310,9 +310,6 @@ class PumpForm extends Component {
         else if (status === false && payload['pumpInitiate']) {
           console.log('Pumps were unsuccessfully connected. ' +
             'Make sure all bus connections to the pumps are closed.');
-          console.log('Am I here?');
-          console.log(status);
-          console.log(payload['pumpInitiate']);
           this.setState({webConnectedToPumps: !this.state.webConnectedToPumps});
           this.setState({selectedPumps: []});
           this.setState({pumps: []});
@@ -477,21 +474,11 @@ class PumpForm extends Component {
       } else if (pumpAction === 'fill') {
         targetVolume = this.state.pumps[PumpName].syringe_volume
       } else if (pumpAction === 'fillToOneThird')  {
-        console.log('ooooo');
-        console.log(pumpAction);
         let pump = this.state.pumps.find(p => p.pump_id === PumpName);
-        console.log(pump);
-        console.log(PumpName);
         targetVolume = pump.syringe_volume * 1/3;
-        console.log(targetVolume);
       } else if (pumpAction === 'fillToTwoThird') {
-        console.log('ppppp');
-        console.log(pumpAction);
         let pump = this.state.pumps.find(p => p.pump_id === PumpName);
-        console.log(pump);
-        console.log(PumpName);
         targetVolume = pump.syringe_volume * 2/3;
-        console.log(targetVolume);
       }
 
       let flowRate = this.computeFlowMilliLitresPerSecond(this.state.activeSubform);

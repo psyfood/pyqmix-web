@@ -19,7 +19,7 @@ flow_param = OrderedDict([('prefix', 'milli'),
 
 ## --- Choose session type --- ##
 app.config.from_object(__name__)
-app.config['test_session'] = False
+app.config['test_session'] = True
 app.secret_key = 'secret_key'
 
 ## --- Flask-RESTPlus models --- ##
@@ -85,12 +85,9 @@ class InitiateOrDisconnectPumps(Resource):
         for pump_id in session_paramters['pumps']:
             pump_state = get_pump_state(pump_id)
             pump_states.append(pump_state)
-        print('123')
-        print(pump_states)
 
         # Return status of pump-setup
         config_setup = is_config_set_up()
-        print(f'Is config set up: {config_setup}')
 
         system_state = {'config_setup': config_setup, 'pump_states': pump_states}
 
@@ -164,7 +161,7 @@ def set_up_config(dll_dir, config_dir):
 def connect_pumps():
 
     if app.config['test_session']:
-        available_pumps = list(range(0, 5))
+        available_pumps = [str(i) for i in range(0,5)]
         pump_objects = list(range(0, 5))
         session_paramters['pumps'] = dict(zip(available_pumps, pump_objects))
         session_paramters['bus'] = 'I am a Qmix Bus.'
@@ -210,8 +207,9 @@ def get_pump_state(pump_id):
             'pump_id': pump_id,
             'is_pumping': session_paramters['get_pumps_states_call_count'] % 5 != 0,
             'fill_level': 20,
-            'name': 'Midpressure 3',
-            'max_flow_rate': 2.5}
+            'max_flow_rate': 2.5,
+            'syringe_volume': 25,
+            'name': 'Midpressure 3'}
 
     else:
         pump_status = {
@@ -234,10 +232,6 @@ def pump_set_fill_level(pump_id, target_volume, flow_rate):
         print(f'Starting pump: {pump_id} and setting '
               f'target_volume to {target_volume} mL '
               f'at {flow_rate} mL/s')
-        print('test')
-        print(session_paramters['pumps'])
-        print(session_paramters['pumps']['2'])
-        print(session_paramters['pumps']['0'])
 
         session_paramters['pumps'][str(pump_id)].set_fill_level(level=target_volume, flow_rate=flow_rate, blocking_wait=False)
 
