@@ -1,129 +1,75 @@
 import React, { Component } from 'react';
 import { Button, ButtonGroup, FormGroup, Input, Modal,
   ModalHeader, ModalBody, ModalFooter, Form, Label, FormText} from 'reactstrap';
-// import logo from './snake.svg';
+import logo from './snake.svg';
 import './App.css';
 
-// --- State --- //
+
 class PumpForm extends Component {
   state = {
 
     // System setup
     webConnectedToPumps: false,  // Does the website think the pumps are connected (based on user-input, not backend)
+    detectedPumps: [],  // List of pump_ID's detected in system
+    selectedPumps: [],  // Pump_ID's selected by user. Defined by index of pumps in state.pumps.
+    pumps: [],  // Pump parameters received from backend
     isPumpConfigSetUp: false,  // Are the pumps set up in the backend
-    userEnteredPumpConfigPaths: false,  // Method to wait for dll and config user input
+    userEnteredPumpConfigPaths: false,
+    smallestSyringeSize: "",
     dllFileLocation: "",
     configFileLocation: "",
 
-    // Pumps
-    pumps: [],  // Pump parameters received from backend
-    selectedPumps: [],  // Pump_ID's selected by user. Defined by index of pumps in state.pumps.
-
-    // Which subform did the user execute
-    activeSubform: "",
-
-    // Repetition
-    repetitions: {
-      'fill': [],
-      'empty': [],
-      'rinse': []
-    },
+    // Repetitions
+    repetitions: [],
 
     // Volume
-    targetVolume: {
-      'fill': [],
-      'bubble': []
-    },
-    volumeUnit: {
-      'fill': "mL",
-      'bubble': "mL"
-    },
+    targetVolume: [],
+    volumeUnit: "mL",
+    targetVolumeMilliLitres: [],
+    volumeUnitConversionFactorToMilliLitres: 1,  // standard is mL
+    volumeInFormUnitAsSpecifiedInForm: [],
+    maximallyAllowedVolumeMilliLitres: [],
+    maximallyAllowedVolumeUnitAsSpecifiedInForm: "",
 
-    // Flow
-    flowRate: {
-      'fill': [],
-      'empty': [],
-      'bubble': [],
-      'rinse': []
-    },
-    flowUnit: {
-      'fill': "mL/s",
-      'empty': "mL/s",
-      'bubble': "mL/s",
-      'rinse': "mL/s"
-    },
+    // Flow rate
+    flowRate: [],  // Input from user
+    flowUnit: "mL/s",  // Input from user
+    flowMilliLitresPerSecond: [],  // Standardized flow rate sent to backend
+    flowUnitConversionFactorToMilliLitresPerMinute: 1, // standard is mL
+    flowRateValueInFormUnitAsSpecifiedInForm: [],
+    maximallyAllowedFlowRateMilliLitresPerSecond: [],
+    maximallyAllowedFlowRateUnitAsSpecifiedInForm: "",
 
     // Modals
     modal: {
       'referenceMove': false,
       'fill': false,
-      'empty': false,
       'bubbleCycleStart': false,
-      'bubbleCycleMiddle': false,
-      'bubbleCycleEnd': false,
       'rinse': false,
+      'empty': false,
+      'bubbleCycleEnd': false,
       'locateConfigFiles': false
     },
   };
 
-  // --- Update state by input-fields --- //
+  // Update state by input-fields
   handledllFileLocationChange = (e) => this.setState({dllFileLocation: e.target.value});
   handleConfigFileLocationChange = (e) => this.setState({configFileLocation: e.target.value});
-  handleLocatingConfig = () => {
-    this.toggle('locateConfigFiles');
-    this.setState({userEnteredPumpConfigPaths: true})
+  handleRepetitionsChange = (e) => this.setState({repetitions: e.target.value});
+
+  // Update VOLUME-related parts of the state by input fields and standardize to the unit: mL, which the backend runs
+  handleTargetVolumeChange = async (e) => {
+    await this.setState({targetVolume: e.target.value});
+    this.setVolumeMilliLitresState();
   };
 
-  // --- Open and close individual modals --- //
-  toggle = (modalType) => {
-    let modals = this.state.modal;
-    modals[modalType] = !modals[modalType];
-    this.setState({modal: modals})
+  handleVolumeUnitChange = async (e) => {
+    await this.makeConversionFactorOfVolumeUnitToMilliLitres(e.target.value);
+    this.setVolumeMilliLitresState();
+    this.minimumSyringeVolume();
   };
 
-  // --- Set single element of dictionary in state --- //
-  handleStateChange = (stateKey, dictKey, value) => {
-    let tmpState = this.state[stateKey];
-    tmpState[dictKey] = value;
-    this.setState({[stateKey]: tmpState});
-  };
-
-  // --- Async set state --- //
-  asyncSetState = (stateNameChange) => {
-    return new Promise(resolve => this.setState(stateNameChange, resolve))
-  };
-
-  // --- Create list of detected pumps --- //
-  createListOfDetectedPumpIDs = () => {
-    return this.state.pumps.map(p => p.pump_id)
-  };
-
-  // --- Update state.selectedPumps based on which pumps the user selected --- //
-  handleSelectedPumpList = (selected) => {
-    const index = this.state.selectedPumps.indexOf(selected);
-    if (index < 0) {
-      this.state.selectedPumps.push(selected);
-    } else {
-      this.state.selectedPumps.splice(index, 1);
-    }
-    this.setState({ selectedPumps: [...this.state.selectedPumps] });
-  };
-
-  // --- Repetition --- //
-  getActiveRepetition = (activeSubform) => {
-    let repetitions = this.state.repetitions;
-    return repetitions[activeSubform];
-  };
-
-  checkRepetitionInput = (activeForm) => {
-    let repetition = this.state.repetitions[activeForm];
-    if (repetition < 1) {
-      this.handleStateChange('repetitions', activeForm, 1);
-    }
-  };
-
-  // --- Volume --- //
-  computeConversionFactorOfVolumeUnitToMilliLitres = (e) => {
+  makeConversionFactorOfVolumeUnitToMilliLitres = async (e) => {
     let factor;
     switch (e) {
       case "mL":
@@ -133,63 +79,42 @@ class PumpForm extends Component {
         factor = 10;
         break;
       default:
-        console.log('An unknown volume unit was used');
+        console.log('An unknown volume unit was used')
     }
-    return factor
+    this.setState({volumeUnitConversionFactorToMilliLitres: factor});
   };
 
-  getActiveTargetVolume = (activeSubform) => {
-    let targetVolume = this.state.targetVolume;
-    return targetVolume[activeSubform]
+  setVolumeMilliLitresState = () => {
+    let volume = this.state.targetVolume;
+    let factor = this.state.volumeUnitConversionFactorToMilliLitres;
+    this.setState({targetVolumeMilliLitres: volume * factor});
   };
 
-  getActiveVolumeUnit = (activeSubform) => {
-    let volumeUnit = this.state.volumeUnit;
-    return volumeUnit[activeSubform]
+  // Updates FLOW-related parts of the state by input fields and standardize to the unit: mL, which the backend runs
+  handleFlowRateChange = async (e) => {
+    let flowRate = e.target.value;
+    await this.setState({flowRate: flowRate});
+    this.setState({flowRateValueInFormUnitAsSpecifiedInForm: flowRate});
+    this.setFlowMilliLitresPerSecondState();
   };
 
-  computeVolumeMilliLitres = (activeSubform) => {
-    let targetVolume = this.getActiveTargetVolume(activeSubform);
-    let volumeUnit = this.getActiveVolumeUnit(activeSubform);
-    let factor = this.computeConversionFactorOfVolumeUnitToMilliLitres(volumeUnit);
-    return targetVolume * factor;
+  // handleFlowUnitChange = async (e) => {
+  //   await this.makeConversionFactorOfFlowUnitToMilliLitres(e.target.value);
+  //   this.setFlowMilliLitresPerSecondState();
+  //   this.maximumFlowRate();
+  // };
+  //
+
+  handleFlowUnitChange = async (e) => {
+    let factor = await this.computeConversionFactorOfFlowUnitToMilliLitres(e.target.value);
+    this.setFlowMilliLitresPerSecondState();
+    this.maximumFlowRate();
   };
 
-  computeMaximallyAllowedVolumeUnitAsSpecifiedInForm = (activeSubform) => {
-    if (this.state.selectedPumps.length > 0) {
-      let maxAllowedVolume = this.computeSmallestSyringeVolumeMilliLitres(activeSubform);
-      let volumeUnit = this.getActiveVolumeUnit(activeSubform);
-      let factor = this.computeConversionFactorOfVolumeUnitToMilliLitres(volumeUnit);
-      return (maxAllowedVolume / factor);
-    } else {return []}
-  };
 
-  computeSmallestSyringeVolumeMilliLitres = (activeSubform) => {
-    // Syringe volume is always set to mL in this.state.pumps
-    if (this.state.selectedPumps.length > 0) {
-      let selectedPumps = this.state.pumps.filter( (e) => this.state.selectedPumps.includes(e.pump_id) );
-      let pumpWithMinSyringeSize = selectedPumps.sort((x, y) => y.syringe_volume - x.syringe_volume).pop();
-      let smallestSyringeSize = pumpWithMinSyringeSize.syringe_volume;
-      return smallestSyringeSize.toString();
-    } else {return ""}
-  };
-
-  checkTargetVolumeInput = (activeSubform) => {
-    if (this.computeSmallestSyringeVolumeMilliLitres(activeSubform) < this.computeVolumeMilliLitres(activeSubform)) {
-      console.log('Maximum volume exceeded, setting flow rate to maximum allowed value');
-      let targetVolume = this.computeMaximallyAllowedVolumeUnitAsSpecifiedInForm(activeSubform);
-      this.handleStateChange('targetVolume', activeSubform, targetVolume);
-    }
-    if (this.computeVolumeMilliLitres(activeSubform) < 0) {
-      console.log('Volume cannot be negative. Setting target volume to zero.');
-      this.handleStateChange('targetVolume', activeSubform, 0);
-    }
-  };
-
-  // --- Flow --- //
-  computeConversionFactorOfFlowUnitToMilliLitres = (flowUnit) => {
+  makeConversionFactorOfFlowUnitToMilliLitres = async (e) => {
     let factor;
-    switch (flowUnit) {
+    switch (e) {
       case "mL/s":
         factor = 1;
         break;
@@ -205,55 +130,49 @@ class PumpForm extends Component {
       default:
         console.log('An unknown flow-rate unit was used')
     }
-    return factor;
+    this.setState({flowUnitConversionFactorToMilliLitresPerMinute: factor})
   };
 
-  computeFlowMilliLitresPerSecond = (activeSubform) => {
-    let flowRate = this.state.flowRate[activeSubform];
-    let factor = this.computeConversionFactorOfFlowUnitToMilliLitres(this.state.flowUnit[activeSubform]);
-    return flowRate * factor;
+  setFlowMilliLitresPerSecondState = () => {
+    let flowRate = this.state.flowRate;
+    let factor = this.state.flowUnitConversionFactorToMilliLitresPerMinute;
+    this.setState({flowMilliLitresPerSecond: flowRate * factor});
   };
 
-  computeMaximallyAllowedFlowRateMilliLitresPerSecond = () => {
-    if (this.state.selectedPumps.length > 0) {
-      let selectedPumps = this.state.pumps.filter((e) => this.state.selectedPumps.includes(e.pump_id));
-      let pumpWithMinFlowRate = selectedPumps.sort((x, y) => y.max_flow_rate - x.max_flow_rate).pop();
-      return pumpWithMinFlowRate.max_flow_rate;
-    } else {return 0}
+  // Open and close individual modals
+  toggle = (modalType) => {
+    let modals = this.state.modal;
+    modals[modalType] = !modals[modalType];
+    this.setState({modal: modals})
   };
 
-  computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm = (activeSubform) => {
-    if (this.state.selectedPumps.length > 0) {
-      let maxAllowedFlow = this.computeMaximallyAllowedFlowRateMilliLitresPerSecond();
-      let factor = this.computeConversionFactorOfFlowUnitToMilliLitres(this.state.flowUnit[activeSubform]);
-      return (maxAllowedFlow / factor).toString();
-    } else {return ""}
-  };
-
-  checkFlowRateInput = (activeSubform) => {
-    if (this.computeMaximallyAllowedFlowRateMilliLitresPerSecond() < this.computeFlowMilliLitresPerSecond(activeSubform)) {
-      console.log('Maximum flow rate exceeded, setting flow rate to maximum allowed value');
-      let flowRate = parseFloat(this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm(activeSubform));
-      this.handleStateChange('flowRate', activeSubform, flowRate);
+  // Update state.selectedPumps based on which pumps the user selected
+  handleSelectedPumpList = (selected) => {
+    const index = this.state.selectedPumps.indexOf(selected);
+    if (index < 0) {
+      this.state.selectedPumps.push(selected);
+    } else {
+      this.state.selectedPumps.splice(index, 1);
     }
-    if (this.computeFlowMilliLitresPerSecond(activeSubform) < 0) {
-      console.log('Flow rate cannot be negative. Setting flow rate to zero.');
-      this.handleStateChange('flowRate', activeSubform, 0);
-    }
+    this.setState({ selectedPumps: [...this.state.selectedPumps] },
+      () => {
+        this.minimumSyringeVolume();
+        this.maximumFlowRate();
+      }
+    );
   };
 
   // Checks whether the bus is ready to be initialized
   handlePumpConfiguration = async (e) => {
-    console.log('Is pump configuration set up already?: ' + this.state.isPumpConfigSetUp);
 
-    // Update state on whether the pump configuration is set up if it's not already registered in the state
+    console.log('Is pump configuration set up?: ' + this.state.isPumpConfigSetUp);
+
+    // Ask backend whether the pump configuration is set up
     if (this.state.isPumpConfigSetUp === false) {
-      await this.getPumpStates();
-      console.log('retrieving pump states from backend');
-      console.log(this.state.isPumpConfigSetUp)
+      await this.getPumpStates()
     }
 
-    // User must set up the pump configuration if it was not set up in the backend (only if the user has pressed detect pumps)
+    // User must set up the pump configuration if it was not set up in the backend
     if (this.state.isPumpConfigSetUp === false && this.state.webConnectedToPumps === false) {
       console.log('Pump configuration was not set up in the backend. User needs to set it up.');
 
@@ -278,18 +197,22 @@ class PumpForm extends Component {
     this.handleConnectPumps();
   };
 
-  // --- Function to wait for user input --- //
   waitForConfigFilesToBeSet = async () => {
     do {
       await new Promise(resolve => setTimeout(resolve, 200));
-    } while (this.state.userEnteredPumpConfigPaths === false);
+    } while (this.state.userEnteredPumpConfig === false);
   };
 
-  // Detect pumps and return a list of them, or disconnect pumps
-  handleConnectPumps = () => {
+  handleLocatingConfig = () => {
+    this.toggle('locateConfigFiles');
+    this.setState({userEnteredPumpConfigPaths: !this.state.userEnteredPumpConfig})
+  };
+
+  // Detect pumps and return a list of them
+  handleConnectPumps = (e) => {
     this.setState({webConnectedToPumps: !this.state.webConnectedToPumps},
       async () => {
-        let payload = {pumpInitiate: this.state.webConnectedToPumps};  // message to connect or disconnect pumps
+        let payload = {pumpInitiate: this.state.webConnectedToPumps};
         console.log('Will try to connect to pumps: ' + payload['pumpInitiate'].toString());
         const response = await fetch('/api/pumps', {
           method: 'put',
@@ -304,139 +227,134 @@ class PumpForm extends Component {
 
         // Pumps were successfully connected
         if (status && payload['pumpInitiate']) {
-          await this.getPumpStates();
+          await this.getPumpStates(e);
+
+          for (let pump_index in this.state.pumps) {
+            this.state.detectedPumps.push(this.state.pumps[pump_index].pump_id)
+          }
+          console.log('Detected pumps: ' + this.state.detectedPumps.toString());
+          this.getPumpStates();
         }
         // Pumps were unsuccesfully connected
         else if (status === false && payload['pumpInitiate']) {
-          console.log('Pumps were unsuccessfully connected. ' +
-            'Make sure all bus connections to the pumps are closed.');
           this.setState({webConnectedToPumps: !this.state.webConnectedToPumps});
+          this.setState({detectedPumps: []});
           this.setState({selectedPumps: []});
-          this.setState({pumps: []});
           // and suggest to the user that paths were wrong or that pumps are not connected
         }
         // Pumps were successfully disconnected
         else if (payload['pumpInitiate'] === false) {
+          this.setState({detectedPumps: []});
           this.setState({selectedPumps: []});
-          this.setState({pumps: []});
         }
       }
     )};
 
-   // --- Reference move --- //
-  handleReferenceMove = () => {
+
+// Reference move
+  handleReferenceMove = (e) => {
+
     // To remove the modal
     this.toggle('referenceMove');
     this.sendCommmandToPumps('referenceMove');
   };
 
-  // --- Fill pumps --- //
-  handleFill = async () => {
+// Fill pumps
+  handleFill = (e) => {
 
     // To remove the modal
     this.toggle('fill');
 
     // Set pumps to fill level
-    await this.sendCommmandToPumps('fillToLevel');
+    this.sendCommmandToPumps('fillToLevel');
 
     // Iterate over repetitions
     let repIndex;
-    for (repIndex = 1; repIndex < this.getActiveRepetition(this.state.activeSubform); repIndex++ ) {
+    for (repIndex = 1; repIndex < this.state.repetitions; repIndex++ ) {
 
       // Empty syringes
-      await this.sendCommmandToPumps('empty');
+      this.sendCommmandToPumps('empty');
 
       // Set pumps to fill level
-      await this.sendCommmandToPumps('fillToLevel');
+      this.sendCommmandToPumps('fillToLevel');
+
     }
   };
 
-  // --- Empty syringes --- //
-  handleEmpty = async () => {
+
+  // Empty syringes
+  handleEmpty = (e) => {
 
     // To remove the modal
     this.toggle('empty');
 
     // Empty syringes
-    await this.sendCommmandToPumps('empty');
+    this.sendCommmandToPumps('empty');
 
     // Iterate over repetitions
     let repIndex;
-    for (repIndex = 1; repIndex < this.getActiveRepetition(this.state.activeSubform); repIndex++ ) {
+    for (repIndex = 1; repIndex < this.state.repetitions; repIndex++ ) {
 
       // Set pumps to fill level
-      await this.sendCommmandToPumps('fill');
+      this.sendCommmandToPumps('fill');
 
       // Empty syringes
-      await this.sendCommmandToPumps('empty');
+      this.sendCommmandToPumps('empty');
+
     }
   };
 
-  // --- Bubble cycle --- //
-  handleBubbleCycleStart = async () => {
+
+// Bubble cycle
+  handleBubbleCycleStart = async (e) => {
 
     // To remove the modal
     this.toggle('bubbleCycleStart');
 
-    // Fill with stimulus
-    await this.sendCommmandToPumps('fillToOneThird');
-
-    await this.waitForPumpingToFinish();
-    this.toggle('bubbleCycleMiddle');
-  };
-
-  handleBubbleCycleMiddle = async () => {
-
-    // To remove the modal
-    this.toggle('bubbleCycleMiddle');
-
     // Fill in air
-    await this.sendCommmandToPumps('fillToTwoThird');
+    this.sendCommmandToPumps('fillToLevel');
 
     // Empty syringes
-    await this.sendCommmandToPumps('empty');
+    this.sendCommmandToPumps('empty');
 
     await this.waitForPumpingToFinish();
     this.toggle('bubbleCycleEnd');
+
   };
 
-  handleBubbleCycleEnd = async () => {
+  handleBubbleCycleEnd = (e) => {
     this.toggle('bubbleCycleEnd');
 
     // Fill in stimulus
-    await this.sendCommmandToPumps('fill');
-
-    // Fill in stimulus
-    await this.sendCommmandToPumps('empty');
-
-    // Finish up by filling to level
-    await this.sendCommmandToPumps('fillToLevel');
+    this.sendCommmandToPumps('fillToLevel');
   };
 
-  // --- Rinse syringes --- //
-  handleRinse = async () => {
+// Rinse syringes
+  handleRinse = (e) => {
 
     // To remove the modal
     this.toggle('rinse');
 
     // Iterate over repetitions
     let repIndex;
-    for (repIndex = 0; repIndex < this.getActiveRepetition(this.state.activeSubform); repIndex++ ) {
+    for (repIndex = 0; repIndex < this.state.repetitions; repIndex++ ) {
 
       // Empty syringes
-      await this.sendCommmandToPumps('empty');
+      this.sendCommmandToPumps('empty');
 
       // Fill syringes
-      await this.sendCommmandToPumps('fill');
+      this.sendCommmandToPumps('fill');
 
       // Empty syringes
-      await this.sendCommmandToPumps('empty');
+      this.sendCommmandToPumps('empty');
+
     }
   };
 
 
-  // --- Send pump command to backend --- //
+// Send pump command to backend
   sendCommmandToPumps = async (action) => {
+
     await this.waitForPumpingToFinish();
 
     let payload;
@@ -456,55 +374,63 @@ class PumpForm extends Component {
     }
   };
 
-  // --- Translate action to pump commands --- //
-  makePumpCommand = async (pumpAction, PumpName) => {
+// Translate action to pump commands
+  makePumpCommand = async (action, PumpName) => {
+
+    // Update what the maximally allowed fill level and flow rate
+    await this.minimumSyringeVolume();
+    await this.maximumFlowRate();
 
     let pumpCommand;
     let targetVolume;
 
-    if (pumpAction === 'referenceMove') {
-      pumpCommand = {action: pumpAction};
-    } else if (pumpAction === 'fillToLevel' || pumpAction === 'fill' || pumpAction === 'empty' || pumpAction === 'fillToOneThird' || pumpAction === 'fillToTwoThird') {
+    if (action === 'referenceMove') {
+      pumpCommand = {action: action};
+    } else if (action === 'fillToLevel' || action === 'fill' || action === 'empty') {
 
       // If the command is fillToLevel, empty, or fill
-      if (pumpAction === 'fillToLevel') {
-        targetVolume = this.computeVolumeMilliLitres(this.state.activeSubform);
-      } else if (pumpAction === 'empty') {
+      if (action === 'fillToLevel') {
+        targetVolume = this.state.targetVolumeMilliLitres;
+      } else if (action === 'empty') {
         targetVolume = 0;
-      } else if (pumpAction === 'fill') {
+      } else if (action === 'fill') {
         targetVolume = this.state.pumps[PumpName].syringe_volume
-      } else if (pumpAction === 'fillToOneThird')  {
-        let pump = this.state.pumps.find(p => p.pump_id === PumpName);
-        targetVolume = pump.syringe_volume * 1/3;
-      } else if (pumpAction === 'fillToTwoThird') {
-        let pump = this.state.pumps.find(p => p.pump_id === PumpName);
-        targetVolume = pump.syringe_volume * 2/3;
       }
 
-      let flowRate = this.computeFlowMilliLitresPerSecond(this.state.activeSubform);
+      // Check that flow rate is maximally the allowed flow rate
+      // Should not be necessary any longer as the input is checked
+      let flowRate;
+      let maxAllowedFlow = this.state.maximallyAllowedFlowRateMilliLitresPerSecond;
+      let selectedFlowRate = this.state.flowMilliLitresPerSecond;
+      if (selectedFlowRate > maxAllowedFlow) {
+        flowRate = maxAllowedFlow
+      } else {flowRate = selectedFlowRate}
+
       pumpCommand = {
-        'action': pumpAction,
+        'action': action,
         'params': {
           'targetVolume': targetVolume,
           'flowRate': flowRate,
         }
       };
+
     } else {}
     return pumpCommand
   };
 
-  // --- Function to wait for pumps to finish --- //
+
   waitForPumpingToFinish = async () => {
     await this.getPumpStates();
     do {
       console.log('Checking whether pumps are still pumping');
       await this.getPumpStates();
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise(resolve => setTimeout(resolve, 2000));
     } while (this.state.pumps.some(x => x.is_pumping));
   };
 
-  // --- Ask backend for pump state --- //
-  getPumpStates = async () => {
+
+  getPumpStates = async (e) => {
+
     const response = await fetch('/api/pumps', {
       method: 'get',
       headers: {
@@ -512,14 +438,18 @@ class PumpForm extends Component {
         'Content-Type': 'application/json'
       },
     });
+
     const json = await response.json();
     console.log('Current pump state:');
     console.log(json);
+
     await this.asyncSetState({pumps: json['pump_states']});
     await this.asyncSetState({isPumpConfigSetUp: json['config_setup']});
+
   };
 
-  //  This function is currently not used
+
+//  This function is currently not used
   getPumpState = async (pumpName) => {
     const response = await fetch('/api/pumps/' + pumpName.toString(), {
       method: 'get',
@@ -528,13 +458,108 @@ class PumpForm extends Component {
         'Content-Type': 'application/json'
       },
     });
+
     const json = await response.json();
     return json;
   };
 
-  // --- Render --- //
+  // Function needs to be updated so it considers volume unit
+  minimumSyringeVolume = () => {
+
+    if (this.state.selectedPumps.length > 0) {
+      let selectedPumps = this.state.pumps.filter( (e) => this.state.selectedPumps.includes(e.pump_id) );
+      let pumpWithMinSyringeSize = selectedPumps.sort((x, y) => y.syringe_volume - x.syringe_volume).pop();
+      let smallestSyringeSize = pumpWithMinSyringeSize.syringe_volume;
+      smallestSyringeSize = smallestSyringeSize / this.state.volumeUnitConversionFactorToMilliLitres;
+      console.log('Maximum allowed volume of selected syringes is now: ' + smallestSyringeSize.toString());
+      this.setState({smallestSyringeSize: smallestSyringeSize.toString()})
+    } else {this.setState({smallestSyringeSize: "300"})}
+  };
+
+  asyncSetState = (stateNameChange) => {
+
+    return new Promise(resolve => this.setState(stateNameChange, resolve))
+  };
+
+  maximumFlowRate = async () => {
+
+    if (this.state.selectedPumps.length > 0) {
+      let selectedPumps = this.state.pumps.filter( (e) => this.state.selectedPumps.includes(e.pump_id) );
+      let pumpWithMinFlowRate = selectedPumps.sort((x, y) => y.max_flow_rate - x.max_flow_rate).pop();
+      let slowestFlowRate = pumpWithMinFlowRate.max_flow_rate;
+      await this.asyncSetState({maximallyAllowedFlowRateMilliLitresPerSecond: slowestFlowRate});
+      console.log('Maximum allowed flow rate of selected syringes is now: ' + slowestFlowRate.toString() + 'mL');
+
+      let maximallyAllowedFlowRateUnitAsSpecifiedInForm = slowestFlowRate / this.state.flowUnitConversionFactorToMilliLitresPerMinute;
+      await this.asyncSetState({maximallyAllowedFlowRateUnitAsSpecifiedInForm: maximallyAllowedFlowRateUnitAsSpecifiedInForm.toString()});
+    } else {this.setState({maximallyAllowedFlowRateUnitAsSpecifiedInForm: ""})}
+
+  };
+
+  checkFlowRateInput = () => {
+    if (this.state.maximallyAllowedFlowRateMilliLitresPerSecond < this.state.flowMilliLitresPerSecond) {
+      this.setState({flowMilliLitresPerSecond: this.state.maximallyAllowedFlowRateMilliLitresPerSecond});
+      console.log('Maximum flow rate exceeded, setting flow rate to maximum allowed value');
+      let flowRateFlow = parseFloat(this.state.maximallyAllowedFlowRateUnitAsSpecifiedInForm);
+      this.setState({flowRateValueInFormUnitAsSpecifiedInForm: flowRateFlow})
+    }
+
+    if (this.state.flowMilliLitresPerSecond < 0) {
+      this.setState({flowMilliLitresPerSecond: 0});
+      console.log('Flow rate cannot be negative. Setting flow rate to zero.');
+      this.setState({flowRateValueInFormUnitAsSpecifiedInForm: 0})
+    }
+  };
+
+
+  // computeflowRateValueInFormUnitAsSpecifiedInForm = () => {
+  //
+  //
+  //
+  //   return flowRateFlow
+  // };
+
+  computeConversionFactorOfFlowUnitToMilliLitres = async (e) => {
+    let factor;
+    switch (e) {
+      case "mL/s":
+        factor = 1;
+        break;
+      case "cL/s":
+        factor = 10;
+        break;
+      case "mL/min":
+        factor = 1/60;
+        break;
+      case "cL/min":
+        factor = 1/6;
+        break;
+      default:
+        console.log('An unknown flow-rate unit was used')
+    }
+    return factor;
+  };
+
+
+
+  checkRepetitionInput = () => {
+    if (this.state.repetitions < 1) {
+      this.setState({repetitions: 1});
+    }
+  };
+
+
+  // ADJUST FOR VOLUME !!!
+  checkVolumeInput = () => {
+    if (this.state.maximallyAllowedFlowRateMilliLitresPerSecond < this.state.flowMilliLitresPerSecond) {
+      this.setState({flowMilliLitresPerSecond: this.state.maximallyAllowedFlowRateMilliLitresPerSecond});
+      console.log('Maximum flow rate exceeded, setting flow rate to maximum allowed value');
+    }
+  };
+
   render = () => {
     return (
+
       <div className="pump-form">
 
         <div className="button-group">
@@ -581,7 +606,7 @@ class PumpForm extends Component {
                   <Input
                     className="text-area-input"
                     onChange={this.handledllFileLocationChange}
-                    placeholder="C:/Users/username/AppData/Local/QmixSDK"
+                    placeholder="C:/Users/au278141/AppData/Local/QmixSDK"
                     name="text"
                     id="exampleText" />
                 </FormGroup>
@@ -598,7 +623,7 @@ class PumpForm extends Component {
 
         <div className="button-group">
           <ButtonGroup>
-            {this.createListOfDetectedPumpIDs().map(pump_id =>
+            {this.state.detectedPumps.map(pump_id =>
               <Button color={"primary"}
                       key={pump_id}
                       onClick={() => this.handleSelectedPumpList(pump_id)}
@@ -617,7 +642,6 @@ class PumpForm extends Component {
                 onSubmit={(e) => {
                   e.preventDefault();
                   this.toggle('referenceMove');
-                  this.setState({activeSubform: 'reference'});
                 }}>
 
             <FormGroup className="input-form">
@@ -645,12 +669,12 @@ class PumpForm extends Component {
             </FormGroup>
           </Form>
 
+
           {/*FILL FORM*/}
           <Form method="post"
                 onSubmit={(e) => {
                   e.preventDefault();
                   this.toggle('fill');
-                  this.setState({activeSubform: 'fill'})
                 }}>
 
             <FormGroup className="input-form">
@@ -664,8 +688,9 @@ class PumpForm extends Component {
                     <ModalHeader>Fill</ModalHeader>
                     <ModalBody>
                       Have you remembered to:
-                      1) Insert the inlet tube into the stimulus?
-                      2) In case of refill, have you remembered to remove the spray head from the outlet?
+                      1) Empty the syringe first?
+                      2) Insert the inlet tube into the stimulus?
+                      3) Remove the spray head from the outlet?
                     </ModalBody>
                     <ModalFooter>
                       <Button color="success" onClick={this.handleFill}> Continue </Button>
@@ -677,33 +702,29 @@ class PumpForm extends Component {
 
                 <div className="col-sm-3 input-subform nrep-subform">
                   <Input type="number"
-                         value={this.state.repetitions['fill']}
+                         value={this.state.repetitions}
                          name="repetitions"
                          min="1"
                          placeholder="No. of repetitions."
-                         onChange={(e) => this.handleStateChange('repetitions', 'fill', e.target.value)}
-                         onBlur={() => this.checkRepetitionInput('fill')}
+                         onChange={this.handleRepetitionsChange}
+                         onBlur={this.checkRepetitionInput}
                          required/>
                 </div>
 
                 <div className="col-sm-3 input-subform volume-subform">
                   <Input type="number"
-                         value={this.state.targetVolume['fill']}
                          pattern="\d+((\.)\d+)?"
                          step="any"
                          name="targetVolume"
                          min="0"
-                         max={this.computeSmallestSyringeVolumeMilliLitres('fill')}
+                         max={this.state.smallestSyringeSize}
                          placeholder="Target volume."
-                         onChange={(e) => this.handleStateChange('targetVolume', 'fill', e.target.value)}
-                         onBlur={() => this.checkTargetVolumeInput('fill')}
+                         onChange={this.handleTargetVolumeChange}
                          required/>
                   <Input type="select"
                          name="volumeUnit"
-                         defaultValue={this.state.volumeUnit['fill']}
-                         onBlur={() => this.checkTargetVolumeInput('fill')}
-                         onChange={(e) => this.handleStateChange('volumeUnit', 'fill', e.target.value)}>
-                    <option value="mL">mL</option>
+                         onChange={this.handleVolumeUnitChange}>
+                    <option value={this.state.volumeUnit}>{this.state.volumeUnit}</option>
                     <option value="cL">cL</option>
                   </Input>
                 </div>
@@ -711,22 +732,21 @@ class PumpForm extends Component {
 
                 <div className="col-sm-3 input-subform flowrate-subform">
                   <Input type="number"
-                         value={this.state.flowRate['fill']}
+                         value={this.state.flowRateValueInFormUnitAsSpecifiedInForm}
                          pattern="\d+((\.)\d+)?"
                          step="any"
                          name="flowRate"
                          min="0"
-                         max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('fill')}
+                         max={this.state.maximallyAllowedFlowRateUnitAsSpecifiedInForm}
                          placeholder="Flow rate."
-                         onChange={(e) => this.handleStateChange('flowRate', 'fill', e.target.value)}
-                         onBlur={() => this.checkFlowRateInput('fill')}
+                         onChange={this.handleFlowRateChange}
+                         onBlur={this.checkFlowRateInput}
                          required/>
                   <Input type="select"
                          name="flowUnit"
-                         defaultValue={this.state.flowUnit}
-                         onBlur={() => this.checkFlowRateInput('fill')}
-                         onChange={(e) => this.handleStateChange('flowUnit', 'fill', e.target.value)}>
-                    <option value="mL/s">mL/s</option>
+                         onBlur={this.checkFlowRateInput}
+                         onChange={this.handleFlowUnitChange}>
+                    <option value={this.state.flowUnit}>{this.state.flowUnit}</option>
                     <option value="mL/min">mL/min</option>
                     <option value="cL/s">cL/s</option>
                     <option value="cL/min">cL/min</option>
@@ -734,6 +754,7 @@ class PumpForm extends Component {
                 </div>
               </div>
             </FormGroup>
+
           </Form>
 
 
@@ -742,7 +763,6 @@ class PumpForm extends Component {
                 onSubmit={(e) => {
                   e.preventDefault();
                   this.toggle('empty');
-                  this.setState({activeSubform: 'empty'})
                 }}>
 
             <FormGroup className="input-form">
@@ -769,12 +789,10 @@ class PumpForm extends Component {
 
                 <div className="col-sm-3 input-subform nrep-subform">
                   <Input type="number"
-                         value={this.state.repetitions['empty']}
                          name="repetitions"
                          min="1"
                          placeholder="No. of repetitions."
-                         onChange={(e) => this.handleStateChange('repetitions', 'empty', e.target.value)}
-                         onBlur={() => this.checkRepetitionInput('empty')}
+                         onChange={this.handleRepetitionsChange}
                          required/>
                 </div>
 
@@ -784,22 +802,18 @@ class PumpForm extends Component {
 
                 <div className="col-sm-3 input-subform flowrate-subform">
                   <Input type="number"
-                         value={this.state.flowRate['empty']}
                          pattern="\d+((\.)\d+)?"
                          step="any"
                          name="flowRate"
                          min="0"
-                         max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('empty')}
+                         max={this.state.maximallyAllowedFlowRateUnitAsSpecifiedInForm}
                          placeholder="Flow rate."
-                         onChange={(e) => this.handleStateChange('flowRate', 'empty', e.target.value)}
-                         onBlur={() => this.checkFlowRateInput('empty')}
+                         onChange={this.handleFlowRateChange}
                          required/>
                   <Input type="select"
                          name="flowUnit"
-                         defaultValue={this.state.flowUnit['empty']}
-                         onBlur={() => this.checkFlowRateInput('empty')}
-                         onChange={(e) => this.handleStateChange('flowUnit', 'empty', e.target.value)}>
-                    <option value="mL/s">mL/s</option>
+                         onChange={this.handleFlowUnitChange}>
+                    <option value={this.state.flowUnit}>{this.state.flowUnit}</option>
                     <option value="mL/min">mL/min</option>
                     <option value="cL/s">cL/s</option>
                     <option value="cL/min">cL/min</option>
@@ -807,6 +821,7 @@ class PumpForm extends Component {
                 </div>
               </div>
             </FormGroup>
+
           </Form>
 
           {/*BUBBLE CYCLE FORM*/}
@@ -814,7 +829,6 @@ class PumpForm extends Component {
                 onSubmit={(e) => {
                   e.preventDefault();
                   this.toggle('bubbleCycleStart');
-                  this.setState({activeSubform: 'bubble'})
                 }}>
 
             <FormGroup className="input-form">
@@ -827,28 +841,17 @@ class PumpForm extends Component {
                   <Modal isOpen={this.state.modal['bubbleCycleStart']} className={this.props.className}>
                     <ModalHeader>Bubble Cycle</ModalHeader>
                     <ModalBody>
-                      Insert the inlet tube into the stimulus reservoir.
+                      Remove the inlet tube from the stimulus reservoir to aspirate air.
                     </ModalBody>
                     <ModalFooter>
                       <Button color="success" onClick={this.handleBubbleCycleStart}> Continue </Button>
                       <Button color="danger" onClick={() => this.toggle('bubbleCycleStart')}> Cancel </Button>
                     </ModalFooter>
                   </Modal>
-                  <Modal isOpen={this.state.modal['bubbleCycleMiddle']} className={this.props.className}>
-                    <ModalHeader>Bubble Cycle</ModalHeader>
-                    <ModalBody>
-                      Remove the inlet tube from the stimulus reservoir to aspirate air.
-                    </ModalBody>
-                    <ModalFooter>
-                      <Button color="success" onClick={this.handleBubbleCycleMiddle}> Continue </Button>
-                      <Button color="danger" onClick={() => this.toggle('bubbleCycleMiddle')}> Cancel </Button>
-                    </ModalFooter>
-                  </Modal>
                   <Modal isOpen={this.state.modal['bubbleCycleEnd']} className={this.props.className}>
                     <ModalHeader>Bubble Cycle</ModalHeader>
                     <ModalBody>
-                      Insert the inlet tube into the stimulus reservoir to aspirate the air in the inlet tube.
-                      The bubble will then be removed and the volume set to the chosen target volume.
+                      Insert to tube inlet into the stimulus reservoir to aspirate stimulus.
                     </ModalBody>
                     <ModalFooter>
                       <Button color="success" onClick={this.handleBubbleCycleEnd}> Continue </Button>
@@ -864,22 +867,18 @@ class PumpForm extends Component {
 
                 <div className="col-sm-3 input-subform volume-subform">
                   <Input type="number"
-                         value={this.state.targetVolume['bubble']}
                          pattern="\d+((\.)\d+)?"
                          step="any"
                          name="targetVolume"
                          min="0"
-                         max={this.computeSmallestSyringeVolumeMilliLitres('bubble')}
+                         max={this.state.smallestSyringeSize}
                          placeholder="Target volume."
-                         onChange={(e) => this.handleStateChange('targetVolume', 'bubble', e.target.value)}
-                         onBlur={() => this.checkTargetVolumeInput('bubble')}
+                         onChange={this.handleTargetVolumeChange}
                          required/>
                   <Input type="select"
                          name="flowUnit"
-                         defaultValue={this.state.volumeUnit['bubble']}
-                         onBlur={() => this.checkTargetVolumeInput('bubble')}
-                         onChange={(e) => this.handleStateChange('volumeUnit', 'bubble', e.target.value)}>
-                    <option value="mL">mL</option>
+                         onChange={this.handleVolumeUnitChange}>
+                    <option value={this.state.volumeUnit}>{this.state.volumeUnit}</option>
                     <option value="cL">cL</option>
                   </Input>
                 </div>
@@ -887,22 +886,18 @@ class PumpForm extends Component {
 
                 <div className="col-sm-3 input-subform flowrate-subform">
                   <Input type="number"
-                         value={this.state.flowRate['bubble']}
                          pattern="\d+((\.)\d+)?"
                          step="any"
                          name="flowRate"
                          min="0"
-                         max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('bubble')}
+                         max={this.state.maximallyAllowedFlowRateUnitAsSpecifiedInForm}
                          placeholder="Flow rate."
-                         onChange={(e) => this.handleStateChange('flowRate', 'bubble', e.target.value)}
-                         onBlur={() => this.checkFlowRateInput('bubble')}
+                         onChange={this.handleFlowRateChange}
                          required/>
                   <Input type="select"
                          name="flowUnit"
-                         defaultValue={this.state.flowUnit['bubble']}
-                         onBlur={() => this.checkFlowRateInput('bubble')}
-                         onChange={(e) => this.handleStateChange('flowUnit', 'bubble', e.target.value)}>
-                    <option value="mL/s">mL/s</option>
+                         onChange={this.handleFlowUnitChange}>
+                    <option value={this.state.flowUnit}>{this.state.flowUnit}</option>
                     <option value="mL/min">mL/min</option>
                     <option value="cL/s">cL/s</option>
                     <option value="cL/min">cL/min</option>
@@ -910,14 +905,16 @@ class PumpForm extends Component {
                 </div>
               </div>
             </FormGroup>
+
           </Form>
-          
+
+
+
           {/*RINSE FORM*/}
           <Form method="post"
                 onSubmit={(e) => {
                   e.preventDefault();
                   this.toggle('rinse');
-                  this.setState({activeSubform: 'rinse'})
                 }}>
 
             <FormGroup className="input-form">
@@ -944,12 +941,10 @@ class PumpForm extends Component {
 
                 <div className="col-sm-3 input-subform nrep-subform">
                   <Input type="number"
-                         value={this.state.repetitions['rinse']}
                          name="repetitions"
                          min="1"
                          placeholder="No. of repetitions."
-                         onChange={(e) => this.handleStateChange('repetitions', 'rinse', e.target.value)}
-                         onBlur={() => this.checkRepetitionInput('rinse')}
+                         onChange={this.handleRepetitionsChange}
                          required/>
                 </div>
 
@@ -959,22 +954,18 @@ class PumpForm extends Component {
 
                 <div className="col-sm-3 input-subform flowrate-subform">
                   <Input type="number"
-                         value={this.state.flowRate['rinse']}
                          pattern="\d+((\.)\d+)?"
                          step="any"
                          name="flowRate"
                          min="0"
-                         max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('rinse')}
+                         max={this.state.maximallyAllowedFlowRateUnitAsSpecifiedInForm}
                          placeholder="Flow rate."
-                         onBlur={() => this.checkFlowRateInput('rinse')}
-                         onChange={(e) => this.handleStateChange('flowRate', 'rinse', e.target.value)}
+                         onChange={this.handleFlowRateChange}
                          required/>
                   <Input type="select"
                          name="flowUnit"
-                         defaultValue={this.state.flowUnit['rinse']}
-                         onBlur={() => this.checkFlowRateInput('rinse')}
-                         onChange={(e) => this.handleStateChange('flowUnit', 'rinse', e.target.value)}>
-                    <option value="mL/s">mL/s</option>
+                         onChange={this.handleFlowUnitChange}>
+                    <option value={this.state.flowUnit}>{this.state.flowUnit}</option>
                     <option value="mL/min">mL/min</option>
                     <option value="cL/s">cL/s</option>
                     <option value="cL/min">cL/min</option>
@@ -982,8 +973,11 @@ class PumpForm extends Component {
                 </div>
               </div>
             </FormGroup>
+
           </Form>
+
         </div>
+
       </div>
     )
   }
@@ -1000,9 +994,7 @@ class App extends Component {
         </header>
         {/*<p className="App-intro">*/}
         {/*</p>*/}
-        <div className="entire-pump-form">
         <PumpForm/>
-        </div>
       </div>
     );
   }

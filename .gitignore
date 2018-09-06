@@ -31,17 +31,21 @@ MANIFEST
 *.manifest
 *.spec
 
+
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
 
-# .idea
-pyqmix_backend/.idea
-pyqmix_frontend/.idea
+# PyCharm
+.idea/
+
+# Node packages
+node_modules/
 
 # Single files
 Project overview.txt
 pyqmix_web.yml
+ToDo.txt
 
 # Unit test / coverage reports
 htmlcov/

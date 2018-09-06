@@ -31,18 +31,17 @@
 /*Mystyle is below*/
 body {
     text-align: center;
-
 }
 
-#main {
+.entire-pump-form {
     background-color: white;
-    border: 2px solid gray;
-    width: 60%;
-    max-width: 500px;
-    min-width: 300px;
+    /*border: 2px solid gray;*/
+    width: 100%;
+    max-width: 770px;
+    min-width: 430px;
     text-align: center;
-    margin: 30px auto 30px auto;
-    padding: 20px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .button-group {
@@ -69,10 +68,15 @@ body {
 }
 
 .button-subform {
-    text-align: right;
-    /*display: table-column;*/
+    text-align: left;
     padding: 5px 5px 5px 0;
-    /*margin: 0 0 0 10px;*/
+}
+
+@media only screen and (min-width:575px) {
+    .button-subform {
+        text-align: right;
+        padding: 5px 5px 5px 0;
+    }
 }
 
 .text-area-input {
