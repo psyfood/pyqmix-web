@@ -263,6 +263,11 @@ def standardize_syringe_parameter(pump_id):
                                 max_piston_stroke_mm=60)
         # Alternative function
         # pump.set_syringe_params_by_type(syringe_type='25 mL glass')
+        # Something like:
+        # if pump.syringe_params:
+            # pass
+        # else:
+        # one pop-up for each individual pump?
 
 if __name__ == '__main__':
     app.run()
