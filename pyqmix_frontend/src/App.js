@@ -31,12 +31,10 @@ class PumpForm extends Component {
 
     // Volume
     targetVolume: {
-      'fill': [],
-      'bubble': []
+      'targetVolume': []
     },
     volumeUnit: {
-      'fill': "mL",
-      'bubble': "mL"
+      'targetVolume': "mL"
     },
 
     // Flow
@@ -44,13 +42,15 @@ class PumpForm extends Component {
       'fill': [],
       'empty': [],
       'bubble': [],
-      'rinse': []
+      'rinse': [],
+      'targetVolume': []
     },
     flowUnit: {
       'fill': "mL/s",
       'empty': "mL/s",
       'bubble': "mL/s",
-      'rinse': "mL/s"
+      'rinse': "mL/s",
+      'targetVolume': "mL/s"
     },
 
     // Modals
@@ -62,6 +62,7 @@ class PumpForm extends Component {
       'bubbleCycleMiddle': false,
       'bubbleCycleEnd': false,
       'rinse': false,
+      'targetVolume': false,
       'locateConfigFiles': false
     },
   };
@@ -410,7 +411,7 @@ class PumpForm extends Component {
     await this.sendCommmandToPumps('empty');
 
     // Finish up by filling to level
-    await this.sendCommmandToPumps('fillToLevel');
+    await this.sendCommmandToPumps('fill');
   };
 
   // --- Rinse syringes --- //
@@ -433,6 +434,18 @@ class PumpForm extends Component {
       await this.sendCommmandToPumps('empty');
     }
   };
+
+  // --- Set target volume of syringes --- //
+  handleTargetVolumeChange = async () => {
+
+    // To remove the modal
+    this.toggle('targetVolume');
+
+    // Finish up by filling to level
+    await this.sendCommmandToPumps('fillToLevel');
+
+  };
+
 
 
   // --- Send pump command to backend --- //
@@ -543,7 +556,6 @@ class PumpForm extends Component {
             onClick={this.handlePumpConfiguration}>
             {this.state.webConnectedToPumps ? "Disconnect Pumps" : "Detect Pumps"}
           </Button>
-
           <Modal isOpen={this.state.modal['locateConfigFiles']} className={this.props.className}>
             <ModalHeader>Browse for pump setup files</ModalHeader>
             {/*<ModalBody></ModalBody>*/}
@@ -627,6 +639,7 @@ class PumpForm extends Component {
                   <Button color="success"
                           disabled={this.state.selectedPumps.length === 0}
                   > Reference Move </Button>
+                  <FormText>Calibrate the selected pumps.</FormText>
                   <Modal isOpen={this.state.modal['referenceMove']} className={this.props.className}>
                     <ModalHeader >Reference Move</ModalHeader>
                     <ModalBody>
@@ -659,7 +672,9 @@ class PumpForm extends Component {
                 <div className="col-sm-3 input-subform button-subform">
                   <Button color="success"
                           disabled={this.state.selectedPumps.length === 0}
-                  > Fill </Button>
+                  > Fill Cycle </Button>
+                  <FormText>Fill & empty the syringe multiple times. Ends with a filled syringe.</FormText>
+
                   <Modal isOpen={this.state.modal['fill']} className={this.props.className}>
                     <ModalHeader>Fill</ModalHeader>
                     <ModalBody>
@@ -677,6 +692,7 @@ class PumpForm extends Component {
 
                 <div className="col-sm-3 input-subform nrep-subform">
                   <Input type="number"
+                         className="foo"
                          value={this.state.repetitions['fill']}
                          name="repetitions"
                          min="1"
@@ -687,25 +703,25 @@ class PumpForm extends Component {
                 </div>
 
                 <div className="col-sm-3 input-subform volume-subform">
-                  <Input type="number"
-                         value={this.state.targetVolume['fill']}
-                         pattern="\d+((\.)\d+)?"
-                         step="any"
-                         name="targetVolume"
-                         min="0"
-                         max={this.computeSmallestSyringeVolumeMilliLitres('fill')}
-                         placeholder="Target volume."
-                         onChange={(e) => this.handleStateChange('targetVolume', 'fill', e.target.value)}
-                         onBlur={() => this.checkTargetVolumeInput('fill')}
-                         required/>
-                  <Input type="select"
-                         name="volumeUnit"
-                         defaultValue={this.state.volumeUnit['fill']}
-                         onBlur={() => this.checkTargetVolumeInput('fill')}
-                         onChange={(e) => this.handleStateChange('volumeUnit', 'fill', e.target.value)}>
-                    <option value="mL">mL</option>
-                    <option value="cL">cL</option>
-                  </Input>
+                  {/*<Input type="number"*/}
+                         {/*value={this.state.targetVolume['fill']}*/}
+                         {/*pattern="\d+((\.)\d+)?"*/}
+                         {/*step="any"*/}
+                         {/*name="targetVolume"*/}
+                         {/*min="0"*/}
+                         {/*max={this.computeSmallestSyringeVolumeMilliLitres('fill')}*/}
+                         {/*placeholder="Target volume."*/}
+                         {/*onChange={(e) => this.handleStateChange('targetVolume', 'fill', e.target.value)}*/}
+                         {/*onBlur={() => this.checkTargetVolumeInput('fill')}*/}
+                         {/*required/>*/}
+                  {/*<Input type="select"*/}
+                         {/*name="volumeUnit"*/}
+                         {/*defaultValue={this.state.volumeUnit['fill']}*/}
+                         {/*onBlur={() => this.checkTargetVolumeInput('fill')}*/}
+                         {/*onChange={(e) => this.handleStateChange('volumeUnit', 'fill', e.target.value)}>*/}
+                    {/*<option value="mL">mL</option>*/}
+                    {/*<option value="cL">cL</option>*/}
+                  {/*</Input>*/}
                 </div>
 
 
@@ -751,7 +767,9 @@ class PumpForm extends Component {
                 <div className="col-sm-3 input-subform button-subform">
                   <Button color="success"
                           disabled={this.state.selectedPumps.length === 0}
-                  > Empty </Button>
+                  > Empty Cycle </Button>
+                  <FormText>Empty & fill the syringe multiple times. Ends with an empty syringe.</FormText>
+
                   <Modal isOpen={this.state.modal['empty']} className={this.props.className}>
                     <ModalHeader>Empty</ModalHeader>
                     <ModalBody>
@@ -824,6 +842,7 @@ class PumpForm extends Component {
                   <Button color="success"
                           disabled={this.state.selectedPumps.length === 0}
                   > Bubble Cycle </Button>
+                  <FormText>Guided procedure to remove air bubbles trapped in the syringe. Ends with a filled syringe.</FormText>
                   <Modal isOpen={this.state.modal['bubbleCycleStart']} className={this.props.className}>
                     <ModalHeader>Bubble Cycle</ModalHeader>
                     <ModalBody>
@@ -848,14 +867,13 @@ class PumpForm extends Component {
                     <ModalHeader>Bubble Cycle</ModalHeader>
                     <ModalBody>
                       Insert the inlet tube into the stimulus reservoir to aspirate the air in the inlet tube.
-                      The bubble will then be removed and the volume set to the chosen target volume.
+                      The bubble will then be removed and the syringe filled.
                     </ModalBody>
                     <ModalFooter>
                       <Button color="success" onClick={this.handleBubbleCycleEnd}> Continue </Button>
                       <Button color="danger" onClick={() => this.toggle('bubbleCycleEnd')}> Cancel </Button>
                     </ModalFooter>
                   </Modal>
-
                 </div>
 
 
@@ -863,25 +881,25 @@ class PumpForm extends Component {
 
 
                 <div className="col-sm-3 input-subform volume-subform">
-                  <Input type="number"
-                         value={this.state.targetVolume['bubble']}
-                         pattern="\d+((\.)\d+)?"
-                         step="any"
-                         name="targetVolume"
-                         min="0"
-                         max={this.computeSmallestSyringeVolumeMilliLitres('bubble')}
-                         placeholder="Target volume."
-                         onChange={(e) => this.handleStateChange('targetVolume', 'bubble', e.target.value)}
-                         onBlur={() => this.checkTargetVolumeInput('bubble')}
-                         required/>
-                  <Input type="select"
-                         name="flowUnit"
-                         defaultValue={this.state.volumeUnit['bubble']}
-                         onBlur={() => this.checkTargetVolumeInput('bubble')}
-                         onChange={(e) => this.handleStateChange('volumeUnit', 'bubble', e.target.value)}>
-                    <option value="mL">mL</option>
-                    <option value="cL">cL</option>
-                  </Input>
+                  {/*<Input type="number"*/}
+                         {/*value={this.state.targetVolume['bubble']}*/}
+                         {/*pattern="\d+((\.)\d+)?"*/}
+                         {/*step="any"*/}
+                         {/*name="targetVolume"*/}
+                         {/*min="0"*/}
+                         {/*max={this.computeSmallestSyringeVolumeMilliLitres('bubble')}*/}
+                         {/*placeholder="Target volume."*/}
+                         {/*onChange={(e) => this.handleStateChange('targetVolume', 'bubble', e.target.value)}*/}
+                         {/*onBlur={() => this.checkTargetVolumeInput('bubble')}*/}
+                         {/*required/>*/}
+                  {/*<Input type="select"*/}
+                         {/*name="flowUnit"*/}
+                         {/*defaultValue={this.state.volumeUnit['bubble']}*/}
+                         {/*onBlur={() => this.checkTargetVolumeInput('bubble')}*/}
+                         {/*onChange={(e) => this.handleStateChange('volumeUnit', 'bubble', e.target.value)}>*/}
+                    {/*<option value="mL">mL</option>*/}
+                    {/*<option value="cL">cL</option>*/}
+                  {/*</Input>*/}
                 </div>
 
 
@@ -926,7 +944,8 @@ class PumpForm extends Component {
                 <div className="col-sm-3 input-subform button-subform">
                   <Button color="success"
                           disabled={this.state.selectedPumps.length === 0}
-                  > Rinse </Button>
+                  > Rinse Cycle </Button>
+                  <FormText>Empty & fill the syringe multiple times. Ends with an empty syringe.</FormText>
                   <Modal isOpen={this.state.modal['rinse']} className={this.props.className}>
                     <ModalHeader>Rinse</ModalHeader>
                     <ModalBody>
@@ -983,6 +1002,91 @@ class PumpForm extends Component {
               </div>
             </FormGroup>
           </Form>
+
+          {/*TARGET VOLUME*/}
+          <Form method="post"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  this.toggle('targetVolume');
+                  this.setState({activeSubform: 'targetVolume'})
+                }}>
+
+            <FormGroup className="input-form">
+              <div className="row">
+                <div className="col-sm-3 input-subform button-subform">
+                  <Button color="success"
+                          disabled={this.state.selectedPumps.length === 0}
+                  > Target Volume </Button>
+                  <FormText>Set target volume of a syringe.</FormText>
+                  <Modal isOpen={this.state.modal['targetVolume']} className={this.props.className}>
+                    <ModalHeader>Target Volume</ModalHeader>
+                    <ModalBody>
+                      If aspirating: insert the inlet tube into the stimulus reservoir
+                      If dispensing: remove the spray head
+                    </ModalBody>
+                    <ModalFooter>
+                      <Button color="success" onClick={() => this.handleTargetVolumeChange()}> Continue </Button>
+                      <Button color="danger" onClick={() => this.toggle('targetVolume')}> Cancel </Button>
+                    </ModalFooter>
+                  </Modal>
+                </div>
+
+
+                <div className="col-sm-3 input-subform nrep-subform"></div>
+
+
+                <div className="col-sm-3 input-subform volume-subform">
+                  <Input type="number"
+                         value={this.state.targetVolume['targetVolume']}
+                         pattern="\d+((\.)\d+)?"
+                         step="any"
+                         name="targetVolume"
+                         min="0"
+                         max={this.computeSmallestSyringeVolumeMilliLitres('targetVolume')}
+                         placeholder="Target volume."
+                         onChange={(e) => this.handleStateChange('targetVolume', 'targetVolume', e.target.value)}
+                         onBlur={() => this.checkTargetVolumeInput('targetVolume')}
+                         required/>
+                  <Input type="select"
+                         name="flowUnit"
+                         defaultValue={this.state.volumeUnit['targetVolume']}
+                         onBlur={() => this.checkTargetVolumeInput('targetVolume')}
+                         onChange={(e) => this.handleStateChange('volumeUnit', 'targetVolume', e.target.value)}>
+                    <option value="mL">mL</option>
+                    <option value="cL">cL</option>
+                  </Input>
+                </div>
+
+
+                <div className="col-sm-3 input-subform flowrate-subform">
+                  <Input type="number"
+                         value={this.state.flowRate['targetVolume']}
+                         pattern="\d+((\.)\d+)?"
+                         step="any"
+                         name="flowRate"
+                         min="0"
+                         max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('targetVolume')}
+                         placeholder="Flow rate."
+                         onChange={(e) => this.handleStateChange('flowRate', 'targetVolume', e.target.value)}
+                         onBlur={() => this.checkFlowRateInput('targetVolume')}
+                         required/>
+                  <Input type="select"
+                         name="flowUnit"
+                         defaultValue={this.state.flowUnit['targetVolume']}
+                         onBlur={() => this.checkFlowRateInput('targetVolume')}
+                         onChange={(e) => this.handleStateChange('flowUnit', 'targetVolume', e.target.value)}>
+                    <option value="mL/s">mL/s</option>
+                    <option value="mL/min">mL/min</option>
+                    <option value="cL/s">cL/s</option>
+                    <option value="cL/min">cL/min</option>
+                  </Input>
+                </div>
+              </div>
+            </FormGroup>
+          </Form>
+
+
+
         </div>
       </div>
     )
