@@ -1,10 +1,24 @@
-from flask import Flask, request
+from flask import Flask, request, send_from_directory
 from flask_restplus import Api, Resource
 from flask_restplus.fields import Float, Boolean, String, Nested
 from pyqmix import QmixBus, config, QmixPump
 import os.path as op
+import sys
 from collections import OrderedDict
 
+# # WHILE I TEST
+# sys._MEIPASS = None
+
+if getattr(sys, '_MEIPASS') is None:
+    RUNNING_FROM_PYINSTALLER = False
+    static_folder = '../pyqmix_frontend/build'
+else:
+    RUNNING_FROM_PYINSTALLER = True
+    static_folder = op.join(sys._MEIPASS, 'pyqmix-web')
+
+print('Serving static files from ' + static_folder)
+
+# app = Flask(__name__, static_folder=static_folder)
 app = Flask(__name__)
 api = Api(app)
 
@@ -57,6 +71,18 @@ initiate_or_disconnect_pumps = api.model('Initiate pumps', {
 class Main(Resource):
 
     pass
+
+
+@api.route('/pyqmix-web/', defaults={'path': ''})
+@api.route('/pyqmix-web/<path:path>')
+class Main(Resource):
+    def get(self, path):
+        print('the path is ' + path)
+        if path == '':
+            return send_from_directory(static_folder, 'index.html')
+        else:
+            return send_from_directory(static_folder, path)
+
 
 @api.route('/api/config')
 class SetUpConfig(Resource):
@@ -270,5 +296,5 @@ def standardize_syringe_parameter(pump_id):
         # one pop-up for each individual pump?
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0')
 
