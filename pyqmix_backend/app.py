@@ -6,10 +6,10 @@ import os.path as op
 import sys
 from collections import OrderedDict
 
-# # WHILE I TEST
-# sys._MEIPASS = None
 
-if getattr(sys, '_MEIPASS') is None:
+# Frontend static folder location depends on whether we are
+# running from PyInstaller or not.
+if getattr(sys, '_MEIPASS', None) is None:
     RUNNING_FROM_PYINSTALLER = False
     static_folder = '../pyqmix_frontend/build'
 else:
@@ -18,8 +18,8 @@ else:
 
 print('Serving static files from ' + static_folder)
 
-# app = Flask(__name__, static_folder=static_folder)
-app = Flask(__name__)
+app = Flask(__name__, static_folder=static_folder)
+# app = Flask(__name__)
 api = Api(app)
 
 session_paramters = {
@@ -94,9 +94,6 @@ class SetUpConfig(Resource):
         config_dir = payload['configDir']
 
         set_up_config(dll_dir=dll_dir, config_dir=config_dir)
-
-        # Can I return something that shows the file paths were correct?
-        # return is_config_set_up()
 
 @api.route('/api/pumps')
 class InitiateOrDisconnectPumps(Resource):
@@ -187,8 +184,9 @@ def set_up_config(dll_dir, config_dir):
 def connect_pumps():
 
     if app.config['test_session']:
-        available_pumps = [str(i) for i in range(0,5)]
-        pump_objects = list(range(0, 5))
+        nb_pumps = 4
+        available_pumps = [str(i) for i in range(0,nb_pumps)]
+        pump_objects = list(range(0, nb_pumps))
         session_paramters['pumps'] = dict(zip(available_pumps, pump_objects))
         session_paramters['bus'] = 'I am a Qmix Bus.'
         return True
