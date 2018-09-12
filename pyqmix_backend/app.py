@@ -19,7 +19,6 @@ else:
 print('Serving static files from ' + static_folder)
 
 app = Flask(__name__, static_folder=static_folder)
-# app = Flask(__name__)
 api = Api(app)
 
 session_paramters = {
@@ -184,7 +183,7 @@ def set_up_config(dll_dir, config_dir):
 def connect_pumps():
 
     if app.config['test_session']:
-        nb_pumps = 4
+        nb_pumps = 5
         available_pumps = [str(i) for i in range(0,nb_pumps)]
         pump_objects = list(range(0, nb_pumps))
         session_paramters['pumps'] = dict(zip(available_pumps, pump_objects))
