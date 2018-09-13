@@ -1,11 +1,24 @@
-from flask import Flask, request
+from flask import Flask, request, send_from_directory
 from flask_restplus import Api, Resource
 from flask_restplus.fields import Float, Boolean, String, Nested
 from pyqmix import QmixBus, config, QmixPump
 import os.path as op
+import sys
 from collections import OrderedDict
 
-app = Flask(__name__)
+
+# Frontend static folder location depends on whether we are
+# running from PyInstaller or not.
+if getattr(sys, '_MEIPASS', None) is None:
+    RUNNING_FROM_PYINSTALLER = False
+    static_folder = '../pyqmix_frontend/build'
+else:
+    RUNNING_FROM_PYINSTALLER = True
+    static_folder = op.join(sys._MEIPASS, 'pyqmix-web')
+
+print('Serving static files from ' + static_folder)
+
+app = Flask(__name__, static_folder=static_folder)
 api = Api(app)
 
 session_paramters = {
@@ -58,6 +71,18 @@ class Main(Resource):
 
     pass
 
+
+@api.route('/pyqmix-web/', defaults={'path': ''})
+@api.route('/pyqmix-web/<path:path>')
+class Main(Resource):
+    def get(self, path):
+        print('the path is ' + path)
+        if path == '':
+            return send_from_directory(static_folder, 'index.html')
+        else:
+            return send_from_directory(static_folder, path)
+
+
 @api.route('/api/config')
 class SetUpConfig(Resource):
 
@@ -68,9 +93,6 @@ class SetUpConfig(Resource):
         config_dir = payload['configDir']
 
         set_up_config(dll_dir=dll_dir, config_dir=config_dir)
-
-        # Can I return something that shows the file paths were correct?
-        # return is_config_set_up()
 
 @api.route('/api/pumps')
 class InitiateOrDisconnectPumps(Resource):
@@ -161,8 +183,9 @@ def set_up_config(dll_dir, config_dir):
 def connect_pumps():
 
     if app.config['test_session']:
-        available_pumps = [str(i) for i in range(0,5)]
-        pump_objects = list(range(0, 5))
+        nb_pumps = 5
+        available_pumps = [str(i) for i in range(0,nb_pumps)]
+        pump_objects = list(range(0, nb_pumps))
         session_paramters['pumps'] = dict(zip(available_pumps, pump_objects))
         session_paramters['bus'] = 'I am a Qmix Bus.'
         return True
@@ -270,5 +293,5 @@ def standardize_syringe_parameter(pump_id):
         # one pop-up for each individual pump?
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0')
 

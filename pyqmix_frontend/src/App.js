@@ -63,7 +63,8 @@ class PumpForm extends Component {
       'bubbleCycleEnd': false,
       'rinse': false,
       'targetVolume': false,
-      'locateConfigFiles': false
+      'locateConfigFiles': false,
+      'noConfigOrDllFound': false,
     },
   };
 
@@ -314,7 +315,9 @@ class PumpForm extends Component {
           this.setState({webConnectedToPumps: !this.state.webConnectedToPumps});
           this.setState({selectedPumps: []});
           this.setState({pumps: []});
-          // and suggest to the user that paths were wrong or that pumps are not connected
+          // inform the user of the error
+          this.toggle('noConfigOrDllFound');
+
         }
         // Pumps were successfully disconnected
         else if (payload['pumpInitiate'] === false) {
@@ -445,8 +448,6 @@ class PumpForm extends Component {
     await this.sendCommmandToPumps('fillToLevel');
 
   };
-
-
 
   // --- Send pump command to backend --- //
   sendCommmandToPumps = async (action) => {
@@ -606,6 +607,15 @@ class PumpForm extends Component {
             </ModalFooter>
           </Modal>
 
+          <Modal isOpen={this.state.modal['noConfigOrDllFound']} className={this.props.className}>
+            <ModalHeader >Error - no pumps were detected.</ModalHeader>
+            <ModalBody>
+              Check that the file paths were correct, that the pumps are powered and connected to the computer, that the bus is not connected already, and then try again.
+            </ModalBody>
+            <ModalFooter>
+              <Button color="success" onClick={() => this.toggle('noConfigOrDllFound')}> OK </Button>
+            </ModalFooter>
+          </Modal>
         </div>
 
         <div className="button-group">
