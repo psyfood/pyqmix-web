@@ -712,28 +712,7 @@ class PumpForm extends Component {
                          required/>
                 </div>
 
-                <div className="col-sm-3 input-subform volume-subform">
-                  {/*<Input type="number"*/}
-                         {/*value={this.state.targetVolume['fill']}*/}
-                         {/*pattern="\d+((\.)\d+)?"*/}
-                         {/*step="any"*/}
-                         {/*name="targetVolume"*/}
-                         {/*min="0"*/}
-                         {/*max={this.computeSmallestSyringeVolumeMilliLitres('fill')}*/}
-                         {/*placeholder="Target volume."*/}
-                         {/*onChange={(e) => this.handleStateChange('targetVolume', 'fill', e.target.value)}*/}
-                         {/*onBlur={() => this.checkTargetVolumeInput('fill')}*/}
-                         {/*required/>*/}
-                  {/*<Input type="select"*/}
-                         {/*name="volumeUnit"*/}
-                         {/*defaultValue={this.state.volumeUnit['fill']}*/}
-                         {/*onBlur={() => this.checkTargetVolumeInput('fill')}*/}
-                         {/*onChange={(e) => this.handleStateChange('volumeUnit', 'fill', e.target.value)}>*/}
-                    {/*<option value="mL">mL</option>*/}
-                    {/*<option value="cL">cL</option>*/}
-                  {/*</Input>*/}
-                </div>
-
+                <div className="col-sm-3 input-subform volume-subform"></div>
 
                 <div className="col-sm-3 input-subform flowrate-subform">
                   <Input type="number"
@@ -888,29 +867,7 @@ class PumpForm extends Component {
 
 
                 <div className="col-sm-3 input-subform nrep-subform"></div>
-
-
-                <div className="col-sm-3 input-subform volume-subform">
-                  {/*<Input type="number"*/}
-                         {/*value={this.state.targetVolume['bubble']}*/}
-                         {/*pattern="\d+((\.)\d+)?"*/}
-                         {/*step="any"*/}
-                         {/*name="targetVolume"*/}
-                         {/*min="0"*/}
-                         {/*max={this.computeSmallestSyringeVolumeMilliLitres('bubble')}*/}
-                         {/*placeholder="Target volume."*/}
-                         {/*onChange={(e) => this.handleStateChange('targetVolume', 'bubble', e.target.value)}*/}
-                         {/*onBlur={() => this.checkTargetVolumeInput('bubble')}*/}
-                         {/*required/>*/}
-                  {/*<Input type="select"*/}
-                         {/*name="flowUnit"*/}
-                         {/*defaultValue={this.state.volumeUnit['bubble']}*/}
-                         {/*onBlur={() => this.checkTargetVolumeInput('bubble')}*/}
-                         {/*onChange={(e) => this.handleStateChange('volumeUnit', 'bubble', e.target.value)}>*/}
-                    {/*<option value="mL">mL</option>*/}
-                    {/*<option value="cL">cL</option>*/}
-                  {/*</Input>*/}
-                </div>
+                <div className="col-sm-3 input-subform volume-subform"></div>
 
 
                 <div className="col-sm-3 input-subform flowrate-subform">
@@ -1094,8 +1051,6 @@ class PumpForm extends Component {
               </div>
             </FormGroup>
           </Form>
-
-
 
         </div>
       </div>
