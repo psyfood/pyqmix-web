@@ -1,10 +1,18 @@
 # -*- mode: python -*-
 
+
+# See:
+# https://stackoverflow.com/a/50402636/1944216
+# https://pythonhosted.org/PyInstaller/spec-files.html#globals-available-to-the-spec-file
+import os
+spec_root = os.path.abspath(SPECPATH)
+
+
 block_cipher = None
 
 
 a = Analysis(['run.py'],
-             pathex=['C:\\Users\\au278141\\Projects\\pyqmix-web\\pyqmix_backend'],
+             pathex=[spec_root],
              binaries=[],
              datas=[('../pyqmix_frontend/build', 'pyqmix-web')],
              hiddenimports=[],
