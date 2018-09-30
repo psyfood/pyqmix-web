@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Button, ButtonGroup, FormGroup, Input, Modal,
-  ModalHeader, ModalBody, ModalFooter, Form, Label, FormText} from 'reactstrap';
+  ModalHeader, ModalBody, ModalFooter, Form, FormText,
+  Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 // import logo from './snake.svg';
 import './App.css';
 
@@ -12,7 +13,8 @@ class PumpForm extends Component {
     webConnectedToPumps: false,  // Does the website think the pumps are connected (based on user-input, not backend)
     isPumpConfigSetUp: false,  // Are the pumps set up in the backend
     userEnteredPumpConfigPaths: false,  // Method to wait for dll and config user input
-    configFileLocation: "",
+    availableConfigurations: [],
+    selectedQmixConfig: "",
 
     // Pumps
     pumps: [],  // Pump parameters received from backend
@@ -64,12 +66,12 @@ class PumpForm extends Component {
       'targetVolume': false,
       'locateConfigFiles': false,
       'noConfigOrDllFound': false,
+      'dropDownOpen': false,
     },
   };
 
   // --- Update state by input-fields --- //
-  // handledllFileLocationChange = (e) => this.setState({dllFileLocation: e.target.value});
-  handleConfigFileLocationChange = (e) => this.setState({configFileLocation: e.target.value});
+  handleConfigFileLocationChange = (e) => this.setState({selectedQmixConfig: e.target.innerText});
   handleLocatingConfig = () => {
     this.toggle('locateConfigFiles');
     this.setState({userEnteredPumpConfigPaths: true})
@@ -258,13 +260,17 @@ class PumpForm extends Component {
     if (this.state.isPumpConfigSetUp === false && this.state.webConnectedToPumps === false) {
       console.log('Pump configuration was not set up in the backend. User needs to set it up.');
 
-      // modal which asks the user to browse for the config and dll files
+      // Update state with available Qmix configutations in the backend
+      await this.getAvailableConfigurations();
+
+      // Modal asks the user to select one of the available config directories by a dropdown
       this.toggle('locateConfigFiles');
       await this.waitForConfigFilesToBeSet();
+      console.log('The user chose config:' + this.state.selectedQmixConfig);
 
       // Send the files to the backend
       let payload;
-      payload = {'configDir': this.state.configFileLocation};
+      payload = {'configName': this.state.selectedQmixConfig};
       await fetch('/api/config', {
         method: 'put',
         headers: {
@@ -276,6 +282,21 @@ class PumpForm extends Component {
     }
     this.setState({userEnteredPumpConfigPaths: false}); // reset state
     this.handleConnectPumps();
+  };
+
+  getAvailableConfigurations = async () => {
+    const response = await fetch('/api/config', {
+      method: 'get',
+      headers: {
+        'Accept': 'application/json, text/plain, */*',
+        'Content-Type': 'application/json'
+      },
+    });
+    const json = await response.json();
+    await this.asyncSetState({availableConfigurations: json});
+    // Use first config as dafault.
+    const defaultConfig = this.state.availableConfigurations[0];
+    await this.asyncSetState({selectedQmixConfig: defaultConfig})
   };
 
   // --- Function to wait for user input --- //
@@ -540,8 +561,7 @@ class PumpForm extends Component {
         'Content-Type': 'application/json'
       },
     });
-    const json = await response.json();
-    return json;
+    return await response.json();
   };
 
   // --- Render --- //
@@ -550,13 +570,15 @@ class PumpForm extends Component {
       <div className="pump-form">
 
         <div className="button-group">
+
           <Button
             color="success"
             onClick={this.handlePumpConfiguration}>
             {this.state.webConnectedToPumps ? "Disconnect Pumps" : "Detect Pumps"}
           </Button>
+
           <Modal isOpen={this.state.modal['locateConfigFiles']} className={this.props.className}>
-            <ModalHeader>Browse for the configuration files</ModalHeader>
+            <ModalHeader>Select a pump configuration</ModalHeader>
             {/*<ModalBody></ModalBody>*/}
             <ModalHeader>
               <Form method="post"
@@ -564,38 +586,22 @@ class PumpForm extends Component {
                       e.preventDefault();
                     }}>
                 <FormGroup>
-                  {/*<Label for="exampleText">config directory</Label>*/}
-                  <FormText
-                    className="text-modal"
-                    color="muted">
-                    For example:
-                    C:/Users/Public/Documents/QmixElements/.../my_own_config
-                  </FormText>
-                  <Input
-                    className="text-area-input"
-                    onChange={this.handleConfigFileLocationChange}
-                    placeholder="C:/Users/Public/Documents/QmixElements/Projects/default_project/Configurations/my_own_config"
-                    type="textarea"
-                    name="text"
-                    required
-                    id="exampleText" />
+                  <Dropdown isOpen={this.state.modal['dropDownOpen']}
+                            toggle={() => this.toggle('dropDownOpen')}>
+                    <DropdownToggle caret>
+                      {this.state.selectedQmixConfig}
+                    </DropdownToggle>
+                    <DropdownMenu>
+                      {this.state.availableConfigurations.map(config =>
+                        <DropdownItem
+                          key={config}
+                          onClick={this.handleConfigFileLocationChange}>
+                          {config}
+                          </DropdownItem>
+                      )}
+                    </DropdownMenu>
+                  </Dropdown>
                 </FormGroup>
-
-                {/*<FormGroup>*/}
-                  {/*<Label for="exampleText">dll directory</Label>*/}
-                  {/*<FormText*/}
-                    {/*className="text-modal"*/}
-                    {/*color="muted">*/}
-                    {/*For example: <br/>*/}
-                    {/*C:/Users/username/AppData/Local/QmixSDK*/}
-                  {/*</FormText>*/}
-                  {/*<Input*/}
-                    {/*className="text-area-input"*/}
-                    {/*onChange={this.handledllFileLocationChange}*/}
-                    {/*placeholder="C:/Users/username/AppData/Local/QmixSDK"*/}
-                    {/*name="text"*/}
-                    {/*id="exampleText" />*/}
-                {/*</FormGroup>*/}
               </Form>
             </ModalHeader>
 

@@ -6,6 +6,7 @@ import os.path as op
 import sys
 import appdirs
 from collections import OrderedDict
+import os
 
 
 # Frontend static folder location depends on whether we are
@@ -38,9 +39,9 @@ app.secret_key = 'secret_key'
 
 ## --- Flask-RESTPlus models --- ##
 config_setup = api.model('config setup' , {
-    'configDir': String(description='Path to config directory',
-                        required=True,
-                        example='C:/Users/Public/Documents/QmixElements/Projects/default_project/Configurations/my_own_config')})
+    'configName': String(description='Configuration name, i.e. the name of a sub-directory of C:/Users/Public/Documents/QmixElements/Projects/default_project/Configurations/',
+                         required=True,
+                         example='five_pumps')})
 
 pump_client_request = api.model('Pumping request', {
     'targetVolume': Float(description='Target volume',
@@ -69,7 +70,6 @@ class Main(Resource):
 
     pass
 
-
 @api.route('/pyqmix-web/', defaults={'path': ''})
 @api.route('/pyqmix-web/<path:path>')
 class Main(Resource):
@@ -84,12 +84,17 @@ class Main(Resource):
 @api.route('/api/config')
 class SetUpConfig(Resource):
 
+    def get(self):
+        # Return a list of available config-dirs and send to frontend
+        default_config_path = 'C:\\Users\\Public\\Documents\\QmixElements\\Projects\\default_project\\Configurations'
+        return get_immediate_subdirectories(default_config_path)
+
     @api.expect(config_setup)
     def put(self):
         payload = request.json
-        config_dir = payload['configDir']
+        config_name = payload['configName']
 
-        set_up_config(config_dir=config_dir)
+        set_up_config(config_name=config_name)
 
 @api.route('/api/pumps')
 class InitiateOrDisconnectPumps(Resource):
@@ -166,18 +171,24 @@ def is_config_set_up():
         else:
             return True
 
-
-def set_up_config(config_dir):
+def set_up_config(config_name):
 
     if app.config['test_session']:
         print(f'Pump configuration is set up using '
-              f'config path: {config_dir}')
+              f'config name: {config_name}')
     else:
-        config.set_qmix_config_dir(config_dir)
+        # Config path
+        default_config_path = os.path.normpath('C:\\Users\\Public\\Documents\\QmixElements\\Projects\\default_project\\Configurations')
+        config_path = os.path.join(default_config_path, config_name)
+        config.set_qmix_config_dir(config_path)
+
         # Autodiscover dll file path
         dll_dir = appdirs.user_data_dir('QmixSDK', '')
         config.set_qmix_dll_dir(dll_dir)
 
+def get_immediate_subdirectories(a_dir):
+    return [name for name in os.listdir(a_dir)
+            if os.path.isdir(os.path.join(a_dir, name))]
 
 def connect_pumps():
 
@@ -283,6 +294,7 @@ def standardize_syringe_parameter(pump_id):
         # Need this as an input instead!
         pump.set_syringe_params(inner_diameter_mm=23.0329,
                                 max_piston_stroke_mm=60)
+
         # Alternative function
         # pump.set_syringe_params_by_type(syringe_type='25 mL glass')
         # Something like:
