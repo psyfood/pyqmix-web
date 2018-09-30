@@ -45,6 +45,9 @@ node_modules/
 Project overview.txt
 pyqmix_web.yml
 ToDo.txt
+/pump_configuration/How to make pumps work via pyqmix on this computer.txt
+/pump_configuration/HowTo.txt
+*.gitignore
 
 # Unit test / coverage reports
 htmlcov/
