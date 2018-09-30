@@ -12,7 +12,6 @@ class PumpForm extends Component {
     webConnectedToPumps: false,  // Does the website think the pumps are connected (based on user-input, not backend)
     isPumpConfigSetUp: false,  // Are the pumps set up in the backend
     userEnteredPumpConfigPaths: false,  // Method to wait for dll and config user input
-    dllFileLocation: "",
     configFileLocation: "",
 
     // Pumps
@@ -69,7 +68,7 @@ class PumpForm extends Component {
   };
 
   // --- Update state by input-fields --- //
-  handledllFileLocationChange = (e) => this.setState({dllFileLocation: e.target.value});
+  // handledllFileLocationChange = (e) => this.setState({dllFileLocation: e.target.value});
   handleConfigFileLocationChange = (e) => this.setState({configFileLocation: e.target.value});
   handleLocatingConfig = () => {
     this.toggle('locateConfigFiles');
@@ -265,8 +264,7 @@ class PumpForm extends Component {
 
       // Send the files to the backend
       let payload;
-      payload = {'dllDir': this.state.dllFileLocation,
-        'configDir': this.state.configFileLocation};
+      payload = {'configDir': this.state.configFileLocation};
       await fetch('/api/config', {
         method: 'put',
         headers: {
@@ -558,7 +556,7 @@ class PumpForm extends Component {
             {this.state.webConnectedToPumps ? "Disconnect Pumps" : "Detect Pumps"}
           </Button>
           <Modal isOpen={this.state.modal['locateConfigFiles']} className={this.props.className}>
-            <ModalHeader>Browse for pump setup files</ModalHeader>
+            <ModalHeader>Browse for the configuration files</ModalHeader>
             {/*<ModalBody></ModalBody>*/}
             <ModalHeader>
               <Form method="post"
@@ -566,7 +564,7 @@ class PumpForm extends Component {
                       e.preventDefault();
                     }}>
                 <FormGroup>
-                  <Label for="exampleText">config directory</Label>
+                  {/*<Label for="exampleText">config directory</Label>*/}
                   <FormText
                     className="text-modal"
                     color="muted">
@@ -583,21 +581,21 @@ class PumpForm extends Component {
                     id="exampleText" />
                 </FormGroup>
 
-                <FormGroup>
-                  <Label for="exampleText">dll directory</Label>
-                  <FormText
-                    className="text-modal"
-                    color="muted">
-                    For example: <br/>
-                    C:/Users/username/AppData/Local/QmixSDK
-                  </FormText>
-                  <Input
-                    className="text-area-input"
-                    onChange={this.handledllFileLocationChange}
-                    placeholder="C:/Users/username/AppData/Local/QmixSDK"
-                    name="text"
-                    id="exampleText" />
-                </FormGroup>
+                {/*<FormGroup>*/}
+                  {/*<Label for="exampleText">dll directory</Label>*/}
+                  {/*<FormText*/}
+                    {/*className="text-modal"*/}
+                    {/*color="muted">*/}
+                    {/*For example: <br/>*/}
+                    {/*C:/Users/username/AppData/Local/QmixSDK*/}
+                  {/*</FormText>*/}
+                  {/*<Input*/}
+                    {/*className="text-area-input"*/}
+                    {/*onChange={this.handledllFileLocationChange}*/}
+                    {/*placeholder="C:/Users/username/AppData/Local/QmixSDK"*/}
+                    {/*name="text"*/}
+                    {/*id="exampleText" />*/}
+                {/*</FormGroup>*/}
               </Form>
             </ModalHeader>
 

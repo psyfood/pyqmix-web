@@ -4,6 +4,7 @@ from flask_restplus.fields import Float, Boolean, String, Nested
 from pyqmix import QmixBus, config, QmixPump
 import os.path as op
 import sys
+import appdirs
 from collections import OrderedDict
 
 
@@ -37,9 +38,6 @@ app.secret_key = 'secret_key'
 
 ## --- Flask-RESTPlus models --- ##
 config_setup = api.model('config setup' , {
-    'dllDir': String(description='Path to dll directory',
-                     required=True,
-                     example='C:/Users/username/AppData/Local/QmixSDK'),
     'configDir': String(description='Path to config directory',
                         required=True,
                         example='C:/Users/Public/Documents/QmixElements/Projects/default_project/Configurations/my_own_config')})
@@ -89,10 +87,9 @@ class SetUpConfig(Resource):
     @api.expect(config_setup)
     def put(self):
         payload = request.json
-        dll_dir = payload['dllDir']
         config_dir = payload['configDir']
 
-        set_up_config(dll_dir=dll_dir, config_dir=config_dir)
+        set_up_config(config_dir=config_dir)
 
 @api.route('/api/pumps')
 class InitiateOrDisconnectPumps(Resource):
@@ -170,13 +167,15 @@ def is_config_set_up():
             return True
 
 
-def set_up_config(dll_dir, config_dir):
+def set_up_config(config_dir):
 
     if app.config['test_session']:
-        print(f'Pump configuration is set up using dll path: {dll_dir}'
-              f' and config path: {config_dir}')
+        print(f'Pump configuration is set up using '
+              f'config path: {config_dir}')
     else:
         config.set_qmix_config_dir(config_dir)
+        # Autodiscover dll file path
+        dll_dir = appdirs.user_data_dir('QmixSDK', '')
         config.set_qmix_dll_dir(dll_dir)
 
 
