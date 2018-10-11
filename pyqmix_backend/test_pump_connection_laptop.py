@@ -2,7 +2,7 @@
 from pyqmix import QmixBus, config, QmixPump
 import os.path as op
 
-config_dir = op.normpath('C:/Users/Public/Documents/QmixElements/Projects/default_project/Configurations/five_pumps_laptop')
+config_dir = op.normpath('C:/Users/Public/Documents/QmixElements/Projects/default_project/Configurations/five_midpressure_pumps')
 dll_dir = op.normpath('C:/Users/au278141/AppData/Local/QmixSDK')
 
 config.set_qmix_config_dir(config_dir)

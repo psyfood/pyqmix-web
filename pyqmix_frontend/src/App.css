@@ -12,6 +12,7 @@
   height: 80px;
   padding: 20px;
   color: white;
+  min-width: 430px;
 }
 
 .App-title {
