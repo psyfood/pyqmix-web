@@ -86,8 +86,12 @@ class SetUpConfig(Resource):
 
     def get(self):
         # Return a list of available config-dirs and send to frontend
-        default_config_path = 'C:\\Users\\Public\\Documents\\QmixElements\\Projects\\default_project\\Configurations'
-        return get_immediate_subdirectories(default_config_path)
+
+        # default_config_path = os.path.normpath('C:\\Users\\Public\\Documents\\QmixElements\\Projects\\default_project\\Configurations')
+        # return get_immediate_subdirectories(default_config_path)
+
+        list_of_available_configurations = config.get_available_qmix_configs()
+        return list_of_available_configurations
 
     @api.expect(config_setup)
     def put(self):
@@ -177,14 +181,10 @@ def set_up_config(config_name):
         print(f'Pump configuration is set up using '
               f'config name: {config_name}')
     else:
-        # Config path
-        default_config_path = os.path.normpath('C:\\Users\\Public\\Documents\\QmixElements\\Projects\\default_project\\Configurations')
-        config_path = os.path.join(default_config_path, config_name)
-        config.set_qmix_config_dir(config_path)
-
-        # Autodiscover dll file path
-        dll_dir = appdirs.user_data_dir('QmixSDK', '')
-        config.set_qmix_dll_dir(dll_dir)
+        # # Config path
+        # default_config_path = os.path.normpath('C:\\Users\\Public\\Documents\\QmixElements\\Projects\\default_project\\Configurations')
+        # config_path = os.path.join(default_config_path, config_name)
+        config.set_qmix_config_dir(n=config_name)
 
 def get_immediate_subdirectories(a_dir):
     return [name for name in os.listdir(a_dir)
