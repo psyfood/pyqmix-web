@@ -4,10 +4,8 @@ from flask_restplus.fields import Float, Boolean, String, Nested
 from pyqmix import QmixBus, config, QmixPump
 import os.path as op
 import sys
-import appdirs
 from collections import OrderedDict
 import os
-
 
 # Frontend static folder location depends on whether we are
 # running from PyInstaller or not.
@@ -31,6 +29,9 @@ session_paramters = {
 flow_param = OrderedDict([('prefix', 'milli'),
                           ('volume_unit', 'litres'),
                           ('time_unit', 'per_second')])
+
+## --- Empty config and let the user specify it --- ##
+config.delete_config()
 
 ## --- Choose session type --- ##
 app.config.from_object(__name__)
@@ -86,9 +87,6 @@ class SetUpConfig(Resource):
 
     def get(self):
         # Return a list of available config-dirs and send to frontend
-
-        # default_config_path = os.path.normpath('C:\\Users\\Public\\Documents\\QmixElements\\Projects\\default_project\\Configurations')
-        # return get_immediate_subdirectories(default_config_path)
 
         list_of_available_configurations = config.get_available_qmix_configs()
         return list_of_available_configurations
@@ -170,7 +168,7 @@ def is_config_set_up():
         else:
             return True
     else:
-        if not config.read_config()['qmix_dll_dir'] or not config.read_config()['qmix_config_dir']:
+        if not config.read_config()['qmix_config_dir']:
             return False
         else:
             return True
@@ -181,10 +179,7 @@ def set_up_config(config_name):
         print(f'Pump configuration is set up using '
               f'config name: {config_name}')
     else:
-        # # Config path
-        # default_config_path = os.path.normpath('C:\\Users\\Public\\Documents\\QmixElements\\Projects\\default_project\\Configurations')
-        # config_path = os.path.join(default_config_path, config_name)
-        config.set_qmix_config_dir(n=config_name)
+        config.set_qmix_config(config_name=config_name)
 
 def get_immediate_subdirectories(a_dir):
     return [name for name in os.listdir(a_dir)
@@ -266,7 +261,7 @@ def pump_set_fill_level(pump_id, target_volume, flow_rate):
               f'target_volume to {target_volume} mL '
               f'at {flow_rate} mL/s')
 
-        session_paramters['pumps'][str(pump_id)].set_fill_level(level=target_volume, flow_rate=flow_rate, blocking_wait=False)
+        session_paramters['pumps'][str(pump_id)].set_fill_level(level=target_volume, flow_rate=flow_rate, wait_until_done=False)
 
 def pump_reference_move(pump_id):
 

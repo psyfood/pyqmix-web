@@ -12,7 +12,7 @@ class PumpForm extends Component {
     // System setup
     webConnectedToPumps: false,  // Does the website think the pumps are connected (based on user-input, not backend)
     isPumpConfigSetUp: false,  // Are the pumps set up in the backend
-    userEnteredPumpConfigPaths: false,  // Method to wait for dll and config user input
+    userEnteredPumpConfigPaths: false,  // Method to wait for user input on config-name
     availableConfigurations: [],
     selectedQmixConfig: "",
 
@@ -611,10 +611,12 @@ class PumpForm extends Component {
             </ModalFooter>
           </Modal>
 
-          <Modal isOpen={this.state.modal['noConfigOrDllFound']} className={this.props.className}>
+          <Modal isOpen={this.state.modal['noConfigOrDllFound']}
+                 className={this.props.className}>
             <ModalHeader >Error - no pumps were detected.</ModalHeader>
             <ModalBody>
-              Check that the file paths were correct, that the pumps are powered and connected to the computer, that the bus is not connected already, and then try again.
+              Check that (1) the pumps are powered on and connected to the computer, and (2) that the bus is not
+              connected already. Then try again.
             </ModalBody>
             <ModalFooter>
               <Button color="success" onClick={() => this.toggle('noConfigOrDllFound')}> OK </Button>
