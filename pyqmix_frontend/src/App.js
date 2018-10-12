@@ -360,7 +360,7 @@ class PumpForm extends Component {
     this.toggle('fill');
 
     // Set pumps to fill level
-    await this.sendCommmandToPumps('fillToLevel');
+    await this.sendCommmandToPumps('fill');
 
     // Iterate over repetitions
     let repIndex;
@@ -370,7 +370,7 @@ class PumpForm extends Component {
       await this.sendCommmandToPumps('empty');
 
       // Set pumps to fill level
-      await this.sendCommmandToPumps('fillToLevel');
+      await this.sendCommmandToPumps('fill');
     }
   };
 
@@ -734,7 +734,7 @@ class PumpForm extends Component {
                          required/>
                   <Input type="select"
                          name="flowUnit"
-                         defaultValue={this.state.flowUnit}
+                         defaultValue={this.state.flowUnit['fill']}
                          onBlur={() => this.checkFlowRateInput('fill')}
                          onChange={(e) => this.handleStateChange('flowUnit', 'fill', e.target.value)}>
                     <option value="mL/s">mL/s</option>
