@@ -216,6 +216,7 @@ def connect_pumps():
 def disconnect_pumps():
 
     if not app.config['test_session']:
+        list(session_paramters['pumps'].values())[0].stop_all_pumps()
         session_paramters['bus'].close()
 
     print(f'Bus before "closing": {session_paramters["bus"]}')
