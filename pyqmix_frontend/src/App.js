@@ -12,9 +12,11 @@ class PumpForm extends Component {
     // System setup
     webConnectedToPumps: false,  // Does the website think the pumps are connected (based on user-input, not backend)
     isPumpConfigSetUp: false,  // Are the pumps set up in the backend
-    userEnteredPumpConfigPaths: false,  // Method to wait for user input on config-name
+    userEnteredPumpConfiguration: false,  // Method to wait for user input on config-name
     availableConfigurations: [],
+    availableSyringeSizes: [],
     selectedQmixConfig: "",
+    selectedSyringeType: "",
 
     // Pumps
     pumps: [],  // Pump parameters received from backend
@@ -66,15 +68,17 @@ class PumpForm extends Component {
       'targetVolume': false,
       'locateConfigFiles': false,
       'noConfigOrDllFound': false,
-      'dropDownOpen': false,
+      'configDropDownOpen': false,
+      'syringeDropDownOpen': false
     },
   };
 
-  // --- Update state by input-fields --- //
-  handleConfigFileLocationChange = (e) => this.setState({selectedQmixConfig: e.target.innerText});
+  // --- Update state by Configuration and Syringe Size fields --- //
+  handleConfigNameChange = (e) => this.setState({selectedQmixConfig: e.target.innerText});
+  handleSyringeTypeChange = (e) => this.setState({selectedSyringeType: e.target.innerText});
   handleLocatingConfig = () => {
     this.toggle('locateConfigFiles');
-    this.setState({userEnteredPumpConfigPaths: true})
+    this.setState({userEnteredPumpConfiguration: true})
   };
 
   // --- Open and close individual modals --- //
@@ -266,11 +270,14 @@ class PumpForm extends Component {
       // Modal asks the user to select one of the available config directories by a dropdown
       this.toggle('locateConfigFiles');
       await this.waitForConfigFilesToBeSet();
-      console.log('The user chose config:' + this.state.selectedQmixConfig);
+      console.log('The user chose config: ' + this.state.selectedQmixConfig +
+        ' and syringe type: ' + this.state.selectedSyringeType);
 
       // Send the files to the backend
       let payload;
-      payload = {'configName': this.state.selectedQmixConfig};
+      payload = {'configName': this.state.selectedQmixConfig,
+        'syringeType': this.state.selectedSyringeType
+      };
       await fetch('/api/config', {
         method: 'put',
         headers: {
@@ -280,7 +287,7 @@ class PumpForm extends Component {
         body: JSON.stringify(payload)
       });
     }
-    this.setState({userEnteredPumpConfigPaths: false}); // reset state
+    this.setState({userEnteredPumpConfiguration: false}); // reset state
     this.handleConnectPumps();
   };
 
@@ -293,17 +300,20 @@ class PumpForm extends Component {
       },
     });
     const json = await response.json();
-    await this.asyncSetState({availableConfigurations: json});
-    // Use first config as dafault.
+    await this.asyncSetState({availableConfigurations: json['available_configs']});
+    await this.asyncSetState({availableSyringeSizes: json['available_syringes']});
+    // Use first item as default.
     const defaultConfig = this.state.availableConfigurations[0];
-    await this.asyncSetState({selectedQmixConfig: defaultConfig})
+    await this.asyncSetState({selectedQmixConfig: defaultConfig});
+    const defaultSyringeType = this.state.availableSyringeSizes[0];
+    await this.asyncSetState({selectedSyringeType: defaultSyringeType})
   };
 
   // --- Function to wait for user input --- //
   waitForConfigFilesToBeSet = async () => {
     do {
       await new Promise(resolve => setTimeout(resolve, 200));
-    } while (this.state.userEnteredPumpConfigPaths === false);
+    } while (this.state.userEnteredPumpConfiguration === false);
   };
 
   // Detect pumps and return a list of them, or disconnect pumps
@@ -577,7 +587,8 @@ class PumpForm extends Component {
             {this.state.webConnectedToPumps ? "Stop and Disconnect Pumps" : "Detect Pumps"}
           </Button>
 
-          <Modal isOpen={this.state.modal['locateConfigFiles']} className={this.props.className}>
+          <Modal isOpen={this.state.modal['locateConfigFiles']}
+                 className={this.props.className}>
             <ModalHeader>Select a pump configuration</ModalHeader>
             {/*<ModalBody></ModalBody>*/}
             <ModalHeader>
@@ -585,9 +596,10 @@ class PumpForm extends Component {
                     onSubmit={(e) => {
                       e.preventDefault();
                     }}>
+                {/*Dropdown for config name*/}
                 <FormGroup>
-                  <Dropdown isOpen={this.state.modal['dropDownOpen']}
-                            toggle={() => this.toggle('dropDownOpen')}>
+                  <Dropdown isOpen={this.state.modal['configDropDownOpen']}
+                            toggle={() => this.toggle('configDropDownOpen')}>
                     <DropdownToggle caret>
                       {this.state.selectedQmixConfig}
                     </DropdownToggle>
@@ -595,13 +607,32 @@ class PumpForm extends Component {
                       {this.state.availableConfigurations.map(config =>
                         <DropdownItem
                           key={config}
-                          onClick={this.handleConfigFileLocationChange}>
+                          onClick={this.handleConfigNameChange}>
                           {config}
                           </DropdownItem>
                       )}
                     </DropdownMenu>
                   </Dropdown>
                 </FormGroup>
+
+                <FormGroup>
+                  <Dropdown isOpen={this.state.modal['syringeDropDownOpen']}
+                            toggle={() => this.toggle('syringeDropDownOpen')}>
+                    <DropdownToggle caret>
+                      {this.state.selectedSyringeType}
+                    </DropdownToggle>
+                    <DropdownMenu>
+                      {this.state.availableSyringeSizes.map(config =>
+                        <DropdownItem
+                          key={config}
+                          onClick={this.handleSyringeTypeChange}>
+                          {config}
+                          </DropdownItem>
+                      )}
+                    </DropdownMenu>
+                  </Dropdown>
+                </FormGroup>
+
               </Form>
             </ModalHeader>
 

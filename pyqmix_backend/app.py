@@ -5,7 +5,7 @@ from pyqmix import QmixBus, config, QmixPump
 import os.path as op
 import sys
 from collections import OrderedDict
-import os
+from pyqmix.pump import syringes
 
 # Frontend static folder location depends on whether we are
 # running from PyInstaller or not.
@@ -42,7 +42,10 @@ app.secret_key = 'secret_key'
 config_setup = api.model('config setup' , {
     'configName': String(description='Configuration name, i.e. the name of a sub-directory of C:/Users/Public/Documents/QmixElements/Projects/default_project/Configurations/',
                          required=True,
-                         example='five_pumps')})
+                         example='five_pumps'),
+    'syringeType': String(description='Syringe type',
+                         required=True,
+                         example='25 mL glass')})
 
 pump_client_request = api.model('Pumping request', {
     'targetVolume': Float(description='Target volume',
@@ -89,12 +92,18 @@ class SetUpConfig(Resource):
         # Return a list of available config-dirs and send to frontend
 
         list_of_available_configurations = config.get_available_qmix_configs()
-        return list_of_available_configurations
+        list_of_available_syringe_sizes = list(syringes.keys())
+
+        setup_dict = {'available_configs': list_of_available_configurations,
+                      'available_syringes': list_of_available_syringe_sizes}
+        return setup_dict
 
     @api.expect(config_setup)
     def put(self):
         payload = request.json
         config_name = payload['configName']
+        session_paramters['syringe_type'] = payload['syringeType']
+
 
         set_up_config(config_name=config_name)
 
@@ -181,10 +190,6 @@ def set_up_config(config_name):
     else:
         config.set_qmix_config(config_name=config_name)
 
-def get_immediate_subdirectories(a_dir):
-    return [name for name in os.listdir(a_dir)
-            if os.path.isdir(os.path.join(a_dir, name))]
-
 def connect_pumps():
 
     if app.config['test_session']:
@@ -206,7 +211,9 @@ def connect_pumps():
             pumps_id = [str(i) for i in range(0, nb_pumps)]
             pump_objects = [QmixPump(index=pump_index) for pump_index in range(0, nb_pumps)]
             session_paramters['pumps'] = dict(zip(pumps_id, pump_objects))
-            [standardize_syringe_parameter(pump_id=p) for p in pumps_id]
+            for p in pumps_id:
+                set_syringe_type(pump_id=p)
+                standardize_syringe_parameter(pump_id=p)
             return True
         except:
             # If the bus connection could not be established
@@ -271,6 +278,13 @@ def pump_reference_move(pump_id):
     else:
         session_paramters['pumps'][str(pump_id)].calibrate()
 
+def set_syringe_type(pump_id):
+
+    pump = session_paramters['pumps'][str(pump_id)]
+    syringe_type = session_paramters['syringe_type']
+
+    pump.set_syringe_params_by_type(syringe_type)
+
 def standardize_syringe_parameter(pump_id):
 
     # The frontend only sends requests in the unit of mL.
@@ -287,17 +301,7 @@ def standardize_syringe_parameter(pump_id):
 
         pump.set_volume_unit(prefix='milli', unit='litres')
 
-        # Need this as an input instead!
-        pump.set_syringe_params(inner_diameter_mm=23.0329,
-                                max_piston_stroke_mm=60)
 
-        # Alternative function
-        # pump.set_syringe_params_by_type(syringe_type='25 mL glass')
-        # Something like:
-        # if pump.syringe_params:
-            # pass
-        # else:
-        # one pop-up for each individual pump?
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
