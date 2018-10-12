@@ -574,7 +574,7 @@ class PumpForm extends Component {
           <Button
             color="success"
             onClick={this.handlePumpConfiguration}>
-            {this.state.webConnectedToPumps ? "Disconnect Pumps" : "Detect Pumps"}
+            {this.state.webConnectedToPumps ? "Stop and Disconnect Pumps" : "Detect Pumps"}
           </Button>
 
           <Modal isOpen={this.state.modal['locateConfigFiles']} className={this.props.className}>
