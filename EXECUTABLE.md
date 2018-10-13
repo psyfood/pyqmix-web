@@ -31,7 +31,7 @@ This will create a 'build'-folder in the frontend directory
 This will create a run.spec file in the backend directory. 
 6. Open the run.spec file and edit it:
 	* Add the following to the top of the script: import os
-	* Add the following to the top of the script: import os spec_root = os.path.abspath(SPECPATH)
+	* Add the following to the top of the script: spec_root = os.path.abspath(SPECPATH)
 	* Edit pathex to: pathex=[spec_root]
 	* Edit datas to: datas=[('../name_of_frontend_folder/build', 'name_of_web_application')]
 7. Repeat step 1, 2 and 3
