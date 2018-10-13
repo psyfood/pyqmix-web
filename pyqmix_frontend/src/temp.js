@@ -17,7 +17,7 @@ class PumpForm extends Component {
     userEnteredPumpConfigPaths: false,
     smallestSyringeSize: "",
     dllFileLocation: "",
-    configFileLocation: "",
+    selectedQmixConfig: "",
 
     // Repetitions
     repetitions: [],
@@ -54,7 +54,7 @@ class PumpForm extends Component {
 
   // Update state by input-fields
   handledllFileLocationChange = (e) => this.setState({dllFileLocation: e.target.value});
-  handleConfigFileLocationChange = (e) => this.setState({configFileLocation: e.target.value});
+  handleConfigFileLocationChange = (e) => this.setState({selectedQmixConfig: e.target.value});
   handleRepetitionsChange = (e) => this.setState({repetitions: e.target.value});
 
   // Update VOLUME-related parts of the state by input fields and standardize to the unit: mL, which the backend runs
