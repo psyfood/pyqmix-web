@@ -12,9 +12,11 @@ class PumpForm extends Component {
     // System setup
     webConnectedToPumps: false,  // Does the website think the pumps are connected (based on user-input, not backend)
     isPumpConfigSetUp: false,  // Are the pumps set up in the backend
-    userEnteredPumpConfigPaths: false,  // Method to wait for user input on config-name
+    userEnteredPumpConfiguration: false,  // Method to wait for user input on config-name and pump-type
     availableConfigurations: [],
+    availableSyringeSizes: [],
     selectedQmixConfig: "",
+    selectedSyringeType: "",
 
     // Pumps
     pumps: [],  // Pump parameters received from backend
@@ -63,18 +65,19 @@ class PumpForm extends Component {
       'bubbleCycleMiddle': false,
       'bubbleCycleEnd': false,
       'rinse': false,
-      'targetVolume': false,
       'locateConfigFiles': false,
       'noConfigOrDllFound': false,
-      'dropDownOpen': false,
+      'configDropDownOpen': false,
+      'syringeDropDownOpen': false
     },
   };
 
-  // --- Update state by input-fields --- //
-  handleConfigFileLocationChange = (e) => this.setState({selectedQmixConfig: e.target.innerText});
+  // --- Update state by Configuration and Syringe Size fields --- //
+  handleConfigNameChange = (e) => this.setState({selectedQmixConfig: e.target.innerText});
+  handleSyringeTypeChange = (e) => this.setState({selectedSyringeType: e.target.innerText});
   handleLocatingConfig = () => {
     this.toggle('locateConfigFiles');
-    this.setState({userEnteredPumpConfigPaths: true})
+    this.setState({userEnteredPumpConfiguration: true})
   };
 
   // --- Open and close individual modals --- //
@@ -266,11 +269,14 @@ class PumpForm extends Component {
       // Modal asks the user to select one of the available config directories by a dropdown
       this.toggle('locateConfigFiles');
       await this.waitForConfigFilesToBeSet();
-      console.log('The user chose config:' + this.state.selectedQmixConfig);
+      console.log('The user chose config: ' + this.state.selectedQmixConfig +
+        ' and syringe type: ' + this.state.selectedSyringeType);
 
       // Send the files to the backend
       let payload;
-      payload = {'configName': this.state.selectedQmixConfig};
+      payload = {'configName': this.state.selectedQmixConfig,
+        'syringeType': this.state.selectedSyringeType
+      };
       await fetch('/api/config', {
         method: 'put',
         headers: {
@@ -280,7 +286,7 @@ class PumpForm extends Component {
         body: JSON.stringify(payload)
       });
     }
-    this.setState({userEnteredPumpConfigPaths: false}); // reset state
+    this.setState({userEnteredPumpConfiguration: false}); // reset state
     this.handleConnectPumps();
   };
 
@@ -293,17 +299,20 @@ class PumpForm extends Component {
       },
     });
     const json = await response.json();
-    await this.asyncSetState({availableConfigurations: json});
-    // Use first config as dafault.
+    await this.asyncSetState({availableConfigurations: json['available_configs']});
+    await this.asyncSetState({availableSyringeSizes: json['available_syringes']});
+    // Use first item as default.
     const defaultConfig = this.state.availableConfigurations[0];
-    await this.asyncSetState({selectedQmixConfig: defaultConfig})
+    await this.asyncSetState({selectedQmixConfig: defaultConfig});
+    const defaultSyringeType = this.state.availableSyringeSizes[0];
+    await this.asyncSetState({selectedSyringeType: defaultSyringeType})
   };
 
   // --- Function to wait for user input --- //
   waitForConfigFilesToBeSet = async () => {
     do {
       await new Promise(resolve => setTimeout(resolve, 200));
-    } while (this.state.userEnteredPumpConfigPaths === false);
+    } while (this.state.userEnteredPumpConfiguration === false);
   };
 
   // Detect pumps and return a list of them, or disconnect pumps
@@ -460,10 +469,10 @@ class PumpForm extends Component {
   // --- Set target volume of syringes --- //
   handleTargetVolumeChange = async () => {
 
-    // To remove the modal
-    this.toggle('targetVolume');
+    // Set state
+    await this.asyncSetState({activeSubform: 'targetVolume'});
 
-    // Finish up by filling to level
+    // Fill to level
     await this.sendCommmandToPumps('fillToLevel');
 
   };
@@ -577,7 +586,8 @@ class PumpForm extends Component {
             {this.state.webConnectedToPumps ? "Stop and Disconnect Pumps" : "Detect Pumps"}
           </Button>
 
-          <Modal isOpen={this.state.modal['locateConfigFiles']} className={this.props.className}>
+          <Modal isOpen={this.state.modal['locateConfigFiles']}
+                 className={this.props.className}>
             <ModalHeader>Select a pump configuration</ModalHeader>
             {/*<ModalBody></ModalBody>*/}
             <ModalHeader>
@@ -585,9 +595,10 @@ class PumpForm extends Component {
                     onSubmit={(e) => {
                       e.preventDefault();
                     }}>
+                {/*Dropdown for config name*/}
                 <FormGroup>
-                  <Dropdown isOpen={this.state.modal['dropDownOpen']}
-                            toggle={() => this.toggle('dropDownOpen')}>
+                  <Dropdown isOpen={this.state.modal['configDropDownOpen']}
+                            toggle={() => this.toggle('configDropDownOpen')}>
                     <DropdownToggle caret>
                       {this.state.selectedQmixConfig}
                     </DropdownToggle>
@@ -595,13 +606,32 @@ class PumpForm extends Component {
                       {this.state.availableConfigurations.map(config =>
                         <DropdownItem
                           key={config}
-                          onClick={this.handleConfigFileLocationChange}>
+                          onClick={this.handleConfigNameChange}>
                           {config}
                           </DropdownItem>
                       )}
                     </DropdownMenu>
                   </Dropdown>
                 </FormGroup>
+
+                <FormGroup>
+                  <Dropdown isOpen={this.state.modal['syringeDropDownOpen']}
+                            toggle={() => this.toggle('syringeDropDownOpen')}>
+                    <DropdownToggle caret>
+                      {this.state.selectedSyringeType}
+                    </DropdownToggle>
+                    <DropdownMenu>
+                      {this.state.availableSyringeSizes.map(config =>
+                        <DropdownItem
+                          key={config}
+                          onClick={this.handleSyringeTypeChange}>
+                          {config}
+                          </DropdownItem>
+                      )}
+                    </DropdownMenu>
+                  </Dropdown>
+                </FormGroup>
+
               </Form>
             </ModalHeader>
 
@@ -694,9 +724,8 @@ class PumpForm extends Component {
                   <Modal isOpen={this.state.modal['fill']} className={this.props.className}>
                     <ModalHeader>Fill</ModalHeader>
                     <ModalBody>
-                      Have you remembered to:
-                      1) Insert the inlet tube into the stimulus?
-                      2) In case of refill, have you remembered to remove the spray head from the outlet?
+                      Insert the inlet tube into the stimulus reservoir and
+                      detach the spray head if repeating the fill procedure.
                     </ModalBody>
                     <ModalFooter>
                       <Button color="success" onClick={this.handleFill}> Continue </Button>
@@ -768,9 +797,8 @@ class PumpForm extends Component {
                   <Modal isOpen={this.state.modal['empty']} className={this.props.className}>
                     <ModalHeader>Empty</ModalHeader>
                     <ModalBody>
-                      Have you remembered to:
-                      1) remove the spray head from the outlet?
-                      2) remove the inlet tube from the stimulus reservoir?
+                      Remove the inlet tube from the stimulus reservoir and
+                      detach the spray head from the mouthpiece.
                     </ModalBody>
                     <ModalFooter>
                       <Button color="success" onClick={this.handleEmpty}> Continue </Button>
@@ -861,8 +889,8 @@ class PumpForm extends Component {
                   <Modal isOpen={this.state.modal['bubbleCycleEnd']} className={this.props.className}>
                     <ModalHeader>Bubble Cycle</ModalHeader>
                     <ModalBody>
-                      Insert the inlet tube into the stimulus reservoir to aspirate the air in the inlet tube.
-                      The bubble will then be removed and the syringe filled.
+                      Insert the inlet tube into the stimulus reservoir.
+                      This is the final step in the Bubble Cycle procedure.
                     </ModalBody>
                     <ModalFooter>
                       <Button color="success" onClick={this.handleBubbleCycleEnd}> Continue </Button>
@@ -922,13 +950,15 @@ class PumpForm extends Component {
                   <Modal isOpen={this.state.modal['rinse']} className={this.props.className}>
                     <ModalHeader>Rinse</ModalHeader>
                     <ModalBody>
-                      Have you remembered to:
-                      1) remove the spray head from the outlet?
-                      2) insert the inlet tube into the rinsing fluid?
+                      Insert the inlet tube into the rinsing fluid
+                      and detach the spray head from the mouthpiece.
                     </ModalBody>
                     <ModalFooter>
-                      <Button color="success" onClick={this.handleRinse}> Continue </Button>
-                      <Button color="danger" onClick={() => this.toggle('rinse')}> Cancel </Button>
+                      <Button color="success"
+                              onClick={this.handleRinse}> Continue </Button>
+                      <Button color="danger"
+                              onClick={() => this.toggle('rinse')}> Cancel
+                      </Button>
                     </ModalFooter>
                   </Modal>
                 </div>
@@ -978,10 +1008,9 @@ class PumpForm extends Component {
 
           {/*TARGET VOLUME*/}
           <Form method="post"
-                onSubmit={(e) => {
+                onSubmit={ (e) => {
                   e.preventDefault();
-                  this.toggle('targetVolume');
-                  this.setState({activeSubform: 'targetVolume'})
+                  this.handleTargetVolumeChange();
                 }}>
 
             <FormGroup className="input-form">
@@ -991,17 +1020,6 @@ class PumpForm extends Component {
                           disabled={this.state.selectedPumps.length === 0}
                   > Target Volume </Button>
                   <FormText>Set target volume of a syringe.</FormText>
-                  <Modal isOpen={this.state.modal['targetVolume']} className={this.props.className}>
-                    <ModalHeader>Target Volume</ModalHeader>
-                    <ModalBody>
-                      If aspirating: insert the inlet tube into the stimulus reservoir
-                      If dispensing: remove the spray head
-                    </ModalBody>
-                    <ModalFooter>
-                      <Button color="success" onClick={() => this.handleTargetVolumeChange()}> Continue </Button>
-                      <Button color="danger" onClick={() => this.toggle('targetVolume')}> Cancel </Button>
-                    </ModalFooter>
-                  </Modal>
                 </div>
 
 
