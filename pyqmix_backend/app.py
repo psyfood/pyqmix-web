@@ -35,7 +35,7 @@ config.delete_config()
 
 ## --- Choose session type --- ##
 app.config.from_object(__name__)
-app.config['test_session'] = True
+app.config['test_session'] = False
 app.secret_key = 'secret_key'
 
 ## --- Flask-RESTPlus models --- ##
