@@ -26,8 +26,8 @@ This will create a 'build'-folder in the frontend directory
 1. Open a terminal 
 2. Browse to the backend-directory
 3. Activate the virtual environment
-4. Write: ``` pyinstaller --onefile run.py ```
-5. Write: ``` pyinstaller --clean app.py ```. 
+4. Type: ``` pyinstaller --onefile run.py ```
+5. Type: ``` pyinstaller --clean app.py ``` 
 This will create a run.spec file in the backend directory. 
 6. Open the run.spec file and edit it:
 	* Add the following to the top of the script: import os
@@ -35,7 +35,7 @@ This will create a run.spec file in the backend directory.
 	* Edit pathex to: pathex=[spec_root]
 	* Edit datas to: datas=[('../name_of_frontend_folder/build', 'name_of_web_application')]
 7. Repeat step 1, 2 and 3
-8. Write: ``` pyinstaller --clean run.spec ```
-9. Write: ``` pyinstaller --onefile run.spec ```.
+8. Type: ``` pyinstaller --clean run.spec ```
+9. Type: ``` pyinstaller --onefile run.spec ```
 
 The web-application can now be run via the run.exe file in the backend's 'dist'-folder. 
