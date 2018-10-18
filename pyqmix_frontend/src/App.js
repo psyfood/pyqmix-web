@@ -14,9 +14,10 @@ class PumpForm extends Component {
     isPumpConfigSetUp: false,  // Are the pumps set up in the backend
     userEnteredPumpConfiguration: false,  // Method to wait for user input on config-name and pump-type
     availableConfigurations: [],
-    availableSyringeSizes: [],
+    availableSyringeTypes: [],
     selectedQmixConfig: "",
     selectedSyringeType: "",
+    userEnteredBubbleToggle: "",
 
     // Pumps
     pumps: [],  // Pump parameters received from backend
@@ -24,6 +25,7 @@ class PumpForm extends Component {
 
     // Which subform did the user execute
     activeSubform: "",
+    requestCounter: 0,
 
     // Repetition
     repetitions: {
@@ -300,11 +302,11 @@ class PumpForm extends Component {
     });
     const json = await response.json();
     await this.asyncSetState({availableConfigurations: json['available_configs']});
-    await this.asyncSetState({availableSyringeSizes: json['available_syringes']});
+    await this.asyncSetState({availableSyringeTypes: json['available_syringes']});
     // Use first item as default.
     const defaultConfig = this.state.availableConfigurations[0];
     await this.asyncSetState({selectedQmixConfig: defaultConfig});
-    const defaultSyringeType = this.state.availableSyringeSizes[0];
+    const defaultSyringeType = this.state.availableSyringeTypes[0];
     await this.asyncSetState({selectedSyringeType: defaultSyringeType})
   };
 
@@ -336,7 +338,7 @@ class PumpForm extends Component {
         if (status && payload['pumpInitiate']) {
           await this.getPumpStates();
         }
-        // Pumps were unsuccesfully connected
+        // Pumps were unsuccessfully connected
         else if (status === false && payload['pumpInitiate']) {
           console.log('Pumps were unsuccessfully connected. ' +
             'Make sure all bus connections to the pumps are closed.');
@@ -355,98 +357,172 @@ class PumpForm extends Component {
       }
     )};
 
-   // --- Reference move --- //
-  handleReferenceMove = () => {
+  handlePumpOperation = async (subform) => {
+
+    // Send request to backend to stop pumps
+    await fetch('/api/stop', {
+      method: 'put',
+      headers: {
+        'Accept': 'application/json, text/plain, */*',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({'stop': true})
+    });
+
+    // Update request counter
+    await this.asyncSetState({requestCounter: this.state.requestCounter+1});
+    let requestCount = this.state.requestCounter;
+
+    switch (subform) {
+      case "referenceMove":
+        this.handleReferenceMove(requestCount);
+        break;
+      case "fill":
+        this.handleFill(requestCount);
+        break;
+      case "empty":
+        this.handleEmpty(requestCount);
+        break;
+      case "bubbleCycle":
+        this.handleBubbleCycle(requestCount);
+        break;
+      case "rinse":
+        this.handleRinse(requestCount);
+        break;
+      case "targetVolume":
+        this.handleTargetVolumeChange(requestCount);
+        break;
+      default:
+        console.log('An unknown pump operation was initiated')
+    }
+  };
+
+  // --- Reference move --- //
+  handleReferenceMove = async (requestCount) => {
+
     // To remove the modal
     this.toggle('referenceMove');
-    this.sendCommmandToPumps('referenceMove');
+    await this.sendCommmandToPumps('referenceMove', requestCount);
   };
 
   // --- Fill pumps --- //
-  handleFill = async () => {
+  handleFill = async (requestCount) => {
 
     // To remove the modal
     this.toggle('fill');
 
     // Set pumps to fill level
-    await this.sendCommmandToPumps('fill');
+    await this.sendCommmandToPumps('fill', requestCount);
 
     // Iterate over repetitions
     let repIndex;
     for (repIndex = 1; repIndex < this.getActiveRepetition(this.state.activeSubform); repIndex++ ) {
 
       // Empty syringes
-      await this.sendCommmandToPumps('empty');
+      await this.sendCommmandToPumps('empty', requestCount);
 
       // Set pumps to fill level
-      await this.sendCommmandToPumps('fill');
+      await this.sendCommmandToPumps('fill', requestCount);
     }
   };
 
   // --- Empty syringes --- //
-  handleEmpty = async () => {
+  handleEmpty = async (requestCount) => {
 
     // To remove the modal
     this.toggle('empty');
 
     // Empty syringes
-    await this.sendCommmandToPumps('empty');
+    await this.sendCommmandToPumps('empty', requestCount);
 
     // Iterate over repetitions
     let repIndex;
     for (repIndex = 1; repIndex < this.getActiveRepetition(this.state.activeSubform); repIndex++ ) {
 
       // Set pumps to fill level
-      await this.sendCommmandToPumps('fill');
+      await this.sendCommmandToPumps('fill', requestCount);
 
       // Empty syringes
-      await this.sendCommmandToPumps('empty');
+      await this.sendCommmandToPumps('empty', requestCount);
     }
   };
 
+  // --- Function to wait for user input --- //
+  waitBubbleToggle = async () => {
+    do {
+      await new Promise(resolve => setTimeout(resolve, 200));
+    } while (this.state.userEnteredBubbleToggle === "");
+  };
+
+  handleBubbleCycleModal = (userResponse) => {
+    console.log(userResponse);
+    this.setState({userEnteredBubbleToggle: userResponse})
+  };
+
   // --- Bubble cycle --- //
-  handleBubbleCycleStart = async () => {
+  handleBubbleCycle = async (requestCount) => {
 
     // To remove the modal
     this.toggle('bubbleCycleStart');
 
     // Fill with stimulus
-    await this.sendCommmandToPumps('fillToOneThird');
+    await this.sendCommmandToPumps('fillToOneThird', requestCount);
 
+    // Continue with the SECOND step of the bubble Cycle
     await this.waitForPumpingToFinish();
     this.toggle('bubbleCycleMiddle');
+
+    // Wait for user feedback and reset state
+    await this.waitBubbleToggle();
+    this.toggle('bubbleCycleMiddle');
+
+    // Abort bubble cycle or continue with the second step
+    if (this.state.userEnteredBubbleToggle === "cancel") {
+      this.setState({userEnteredBubbleToggle: ""});
+    } else if (this.state.userEnteredBubbleToggle === "continue") {
+      this.setState({userEnteredBubbleToggle: ""});
+      this.handleBubbleCycleMiddle(requestCount)
+    }
   };
 
-  handleBubbleCycleMiddle = async () => {
-
-    // To remove the modal
-    this.toggle('bubbleCycleMiddle');
+  handleBubbleCycleMiddle = async (requestCount) => {
 
     // Fill in air
-    await this.sendCommmandToPumps('fillToTwoThird');
+    await this.sendCommmandToPumps('fillToTwoThird', requestCount);
 
     // Empty syringes
-    await this.sendCommmandToPumps('empty');
+    await this.sendCommmandToPumps('empty', requestCount);
 
     await this.waitForPumpingToFinish();
     this.toggle('bubbleCycleEnd');
-  };
 
-  handleBubbleCycleEnd = async () => {
+    // Wait for user feedback and reset state
+    await this.waitBubbleToggle();
     this.toggle('bubbleCycleEnd');
 
-    // Fill in stimulus
-    await this.sendCommmandToPumps('fill');
+    // Abort bubble cycle or continue with the third step
+    if (this.state.userEnteredBubbleToggle === "cancel") {
+      this.setState({userEnteredBubbleToggle: ""});
+    } else if (this.state.userEnteredBubbleToggle === "continue") {
+      this.setState({userEnteredBubbleToggle: ""});
+      this.handleBubbleCycleEnd(requestCount)
+    }
+  };
+
+  handleBubbleCycleEnd = async (requestCount) => {
 
     // Fill in stimulus
-    await this.sendCommmandToPumps('empty');
+    await this.sendCommmandToPumps('fill', requestCount);
+
+    // Fill in stimulus
+    await this.sendCommmandToPumps('empty', requestCount);
 
     // Finish up by filling to level
-    await this.sendCommmandToPumps('fill');
+    await this.sendCommmandToPumps('fill', requestCount);
   };
 
   // --- Rinse syringes --- //
-  handleRinse = async () => {
+  handleRinse = async (requestCount) => {
 
     // To remove the modal
     this.toggle('rinse');
@@ -456,45 +532,50 @@ class PumpForm extends Component {
     for (repIndex = 0; repIndex < this.getActiveRepetition(this.state.activeSubform); repIndex++ ) {
 
       // Empty syringes
-      await this.sendCommmandToPumps('empty');
+      await this.sendCommmandToPumps('empty', requestCount);
 
       // Fill syringes
-      await this.sendCommmandToPumps('fill');
+      await this.sendCommmandToPumps('fill', requestCount);
 
       // Empty syringes
-      await this.sendCommmandToPumps('empty');
+      await this.sendCommmandToPumps('empty', requestCount);
     }
   };
 
   // --- Set target volume of syringes --- //
-  handleTargetVolumeChange = async () => {
+  handleTargetVolumeChange = async (requestCount) => {
 
     // Set state
     await this.asyncSetState({activeSubform: 'targetVolume'});
 
     // Fill to level
-    await this.sendCommmandToPumps('fillToLevel');
+    await this.sendCommmandToPumps('fillToLevel', requestCount);
 
   };
 
   // --- Send pump command to backend --- //
-  sendCommmandToPumps = async (action) => {
-    await this.waitForPumpingToFinish();
+  sendCommmandToPumps = async (action, requestCount) => {
 
-    let payload;
-    for (let Index in this.state.selectedPumps) {
-      let pumpID = this.state.selectedPumps[Index];
-      payload = await this.makePumpCommand(action, pumpID);
+    console.log('test whether the below output makes senses');
+    console.log(requestCount === this.state.requestCounter);
+    if (requestCount === this.state.requestCounter) {
+      await this.waitForPumpingToFinish();
 
-      // Send information to pump-specific endpoint
-      fetch('/api/pumps/'+pumpID.toString(), {
-        method: 'put',
-        headers: {
-          'Accept': 'application/json, text/plain, */*',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
+      let payload;
+      for (let Index in this.state.selectedPumps) {
+        let pumpID = this.state.selectedPumps[Index];
+        payload = await this.makePumpCommand(action, pumpID);
+
+        // Send information to pump-specific endpoint
+        fetch('/api/pumps/'+pumpID.toString(), {
+          method: 'put',
+          headers: {
+            'Accept': 'application/json, text/plain, */*',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+      }
     }
   };
 
@@ -621,7 +702,7 @@ class PumpForm extends Component {
                       {this.state.selectedSyringeType}
                     </DropdownToggle>
                     <DropdownMenu>
-                      {this.state.availableSyringeSizes.map(config =>
+                      {this.state.availableSyringeTypes.map(config =>
                         <DropdownItem
                           key={config}
                           onClick={this.handleSyringeTypeChange}>
@@ -692,7 +773,7 @@ class PumpForm extends Component {
                       Detach all syringes from the pumps before continuing.
                     </ModalBody>
                     <ModalFooter>
-                      <Button color="success" onClick={this.handleReferenceMove}> Continue </Button>
+                      <Button color="success" onClick={() => this.handlePumpOperation('referenceMove')}> Continue </Button>
                       <Button color="danger" onClick={() => this.toggle('referenceMove')}> Cancel </Button>
                     </ModalFooter>
                   </Modal>
@@ -728,7 +809,7 @@ class PumpForm extends Component {
                       detach the spray head if repeating the fill procedure.
                     </ModalBody>
                     <ModalFooter>
-                      <Button color="success" onClick={this.handleFill}> Continue </Button>
+                      <Button color="success" onClick={() => this.handlePumpOperation('fill')}> Continue </Button>
                       <Button color="danger" onClick={() => this.toggle('fill')}> Cancel </Button>
                     </ModalFooter>
                   </Modal>
@@ -801,7 +882,7 @@ class PumpForm extends Component {
                       detach the spray head from the mouthpiece.
                     </ModalBody>
                     <ModalFooter>
-                      <Button color="success" onClick={this.handleEmpty}> Continue </Button>
+                      <Button color="success" onClick={() => this.handlePumpOperation('empty')}> Continue </Button>
                       <Button color="danger" onClick={() => this.toggle('empty')}> Cancel </Button>
                     </ModalFooter>
                   </Modal>
@@ -866,35 +947,50 @@ class PumpForm extends Component {
                           disabled={this.state.selectedPumps.length === 0}
                   > Bubble Cycle </Button>
                   <FormText>Guided procedure to remove air bubbles trapped in the syringe. Ends with a filled syringe.</FormText>
-                  <Modal isOpen={this.state.modal['bubbleCycleStart']} className={this.props.className}>
+                  <Modal isOpen={this.state.modal['bubbleCycleStart']}
+                         className={this.props.className}>
                     <ModalHeader>Bubble Cycle</ModalHeader>
                     <ModalBody>
                       Insert the inlet tube into the stimulus reservoir.
                     </ModalBody>
                     <ModalFooter>
-                      <Button color="success" onClick={this.handleBubbleCycleStart}> Continue </Button>
-                      <Button color="danger" onClick={() => this.toggle('bubbleCycleStart')}> Cancel </Button>
+                      <Button
+                        color="success"
+                        onClick={() => this.handlePumpOperation('bubbleCycle')}> Continue </Button>
+                      <Button
+                        color="danger"
+                        onClick={() => this.toggle('bubbleCycleStart')}> Cancel </Button>
                     </ModalFooter>
                   </Modal>
-                  <Modal isOpen={this.state.modal['bubbleCycleMiddle']} className={this.props.className}>
+                  <Modal isOpen={this.state.modal['bubbleCycleMiddle']}
+                         className={this.props.className}>
                     <ModalHeader>Bubble Cycle</ModalHeader>
                     <ModalBody>
                       Remove the inlet tube from the stimulus reservoir to aspirate air.
                     </ModalBody>
                     <ModalFooter>
-                      <Button color="success" onClick={this.handleBubbleCycleMiddle}> Continue </Button>
-                      <Button color="danger" onClick={() => this.toggle('bubbleCycleMiddle')}> Cancel </Button>
+                      <Button
+                        color="success"
+                        onClick={() => this.handleBubbleCycleModal('continue')}> Continue
+                      </Button>
+                      <Button
+                        color="danger"
+                        onClick={() => this.handleBubbleCycleModal('cancel')}> Cancel
+                      </Button>
                     </ModalFooter>
                   </Modal>
-                  <Modal isOpen={this.state.modal['bubbleCycleEnd']} className={this.props.className}>
+                  <Modal isOpen={this.state.modal['bubbleCycleEnd']}
+                         className={this.props.className}>
                     <ModalHeader>Bubble Cycle</ModalHeader>
                     <ModalBody>
                       Insert the inlet tube into the stimulus reservoir.
                       This is the final step in the Bubble Cycle procedure.
                     </ModalBody>
                     <ModalFooter>
-                      <Button color="success" onClick={this.handleBubbleCycleEnd}> Continue </Button>
-                      <Button color="danger" onClick={() => this.toggle('bubbleCycleEnd')}> Cancel </Button>
+                      <Button color="success"
+                              onClick={() => this.handleBubbleCycleModal('continue')}> Continue </Button>
+                      <Button color="danger"
+                              onClick={() => this.handleBubbleCycleModal('cancel')}> Cancel </Button>
                     </ModalFooter>
                   </Modal>
                 </div>
@@ -955,7 +1051,7 @@ class PumpForm extends Component {
                     </ModalBody>
                     <ModalFooter>
                       <Button color="success"
-                              onClick={this.handleRinse}> Continue </Button>
+                              onClick={() => this.handlePumpOperation('rinse')}> Continue </Button>
                       <Button color="danger"
                               onClick={() => this.toggle('rinse')}> Cancel
                       </Button>
@@ -1010,7 +1106,7 @@ class PumpForm extends Component {
           <Form method="post"
                 onSubmit={ (e) => {
                   e.preventDefault();
-                  this.handleTargetVolumeChange();
+                  this.handlePumpOperation('targetVolume');
                 }}>
 
             <FormGroup className="input-form">

@@ -66,6 +66,10 @@ initiate_or_disconnect_pumps = api.model('Initiate pumps', {
                             required=True,
                             example=True)})
 
+stop_pumps = api.model('Stop pumps', {
+    'stop': Boolean(description='Stop pumps',
+                    required=True,
+                    example=True)})
 
 ## --- Endpoints --- ##
 
@@ -141,6 +145,14 @@ class InitiateOrDisconnectPumps(Resource):
             status = disconnect_pumps()
 
         return status
+
+@api.route('/api/stop')
+class StopPumps(Resource):
+
+    @api.expect(stop_pumps)
+    def put(self):
+        if not app.config['test_session']:
+            list(session_paramters['pumps'].values())[0].stop_all_pumps()
 
 
 @api.route('/api/pumps/<int:pump_id>')
