@@ -9,20 +9,21 @@ The user-visible part of pyqmix-web runs in the web browser. You need a modern b
 - Have fun!
 
 ## Installation instructions for developers 
-- Clone this (pyqmix-web) repository 
+- Clone this (`pyqmix-web`) repository 
 
 ### Set up frontend
-- Install nodeJS from https://nodejs.org/en/download/
-  - Select 'Current Latest Features' 64-bit windows installer (.msi)
+- Install Node.js from https://nodejs.org/en/download/
+  - Select the _Current Latest Features_ 64-bit windows installer (.msi)
   - Accept default settings during installation
-- Open the Node.js command prompt 
-  - Browse to the 'pyqmix_frontend'-folder in pyqmix-web
+- Open the your terminal (e.g., `cmd.exe`)
+  - Browse to the `pyqmix_frontend` subfolder of `pyqmix-web`
   - Type: `npm install`
 
 ### Set up backend
 - Create a conda virtual environment
 - Activate the virtual environment
-  - Type: conda install flask
-  - Type: pip install flask_restplus
-  - Type: pip install pyqmix
+- Insall the dependencies
+  - Type: `conda install flask`
+  - Type: `pip install flask_restplus`
+  - Type: `pip install pyqmix`
 
