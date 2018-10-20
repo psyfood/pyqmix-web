@@ -35,4 +35,4 @@ exe = EXE(pyz,
           upx=True,
           runtime_tmpdir=None,
           console=True,
-		  icon='../pyqmix_frontend/public/pyqmixweb_desktop_icon.ico')
+          icon='../pyqmix_frontend/public/pyqmixweb_desktop_icon.ico')
