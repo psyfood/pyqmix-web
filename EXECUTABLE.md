@@ -1,41 +1,45 @@
 # How to create an executable of a web-application
 
 ## This guideline assumes that:
-- A run.py file has been created. 
-Check out the run.py file in this repository. 
-- That Flask serves static files from ...\AppData\Local\Temp\name_of_meipass_folder
-when it is run via pyinstaller. 
-Check out the app.py file in this repository. 
+- A `run.py` file has been created. 
+Check out the `run.py` file in this repository.
+- Flask serves static files from the `pyqmix` sub-directory of an automatically created temporary folder. The exact location of this folder is saved in the environment variabe `_MEIPASS` when the `PyInstaller`-created standalone exectuable is started. Typically it will be located inside the current user's `AppData\Local\Temp` folder.
+Check out the `app.py` file in this repository. 
 - The frontend and backend are located in neighboring directories
 
-## Prepare a virtual environment 
+## Prepare the Python virtual environment for the backend
 - Create a virtual environment
-- Install packages that are nessesary for the web-application
-- Flask must be installed via pip, and not conda
-- Install pyinstaller
+- Install the required dependencies: `flask`, `flask-restplus`, and, of course, `pyqmix`
+- Install `PyInstaller`
 
-## Create a build of the frontend
+## Create a production build of the React frontend
 1. Open a terminal
-2. Browse to the frontend-directory
-3. Activate the virtual environment created in the previous step
-4. Write: ``` npm run build ```
+2. Browse to the `pyqmix_frontend` directory
+4. Type: `npm run build`
 
-This will create a 'build'-folder in the frontend directory  
+This will create a `build`-folder in the current directory  
 
-## Create an executable
+## Create a specification file
+Specification files can be reused to generate executables so keep the file for the next build. 
+Skip this step if you already have a specification file.
 1. Open a terminal 
 2. Browse to the backend-directory
 3. Activate the virtual environment
-4. Write: ``` pyinstaller --onefile run.py ```
-5. Write: ``` pyinstaller --clean app.py ```. 
+4. Type: `pyinstaller --onefile run.py`
 This will create a run.spec file in the backend directory. 
-6. Open the run.spec file and edit it:
-	* Add the following to the top of the script: import os
-	* Add the following to the top of the script: spec_root = os.path.abspath(SPECPATH)
-	* Edit pathex to: pathex=[spec_root]
-	* Edit datas to: datas=[('../name_of_frontend_folder/build', 'name_of_web_application')]
-7. Repeat step 1, 2 and 3
-8. Write: ``` pyinstaller --clean run.spec ```
-9. Write: ``` pyinstaller --onefile run.spec ```.
+5. Open the run.spec file and edit it:
+	* Add the following to the top of the script: 
+	  ```python
+	  import os
+	  spec_root = os.path.abspath(SPECPATH)
+	  ```
+	* Edit pathex to: `pathex=[spec_root]`
+	* Edit datas to: `datas=[('../name_of_frontend_folder/build', 'name_of_web_application')]`
 
-The web-application can now be run via the run.exe file in the backend's 'dist'-folder. 
+## Build the executable
+1. Open a terminal 
+2. Browse to the `pyqmix_backend` directory
+3. Activate the virtual environment
+4. Type: `pyinstaller --clean run.spec`
+
+This generates a `run.exe` file inside the the backend's `dist` folder. 
