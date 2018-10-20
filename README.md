@@ -15,7 +15,7 @@ The user-visible part of pyqmix-web runs in the web browser. You need a modern b
 - Install Node.js from https://nodejs.org/en/download/
   - Select the _Current Latest Features_ 64-bit windows installer (.msi)
   - Accept default settings during installation
-- Open the your terminal (e.g., `cmd.exe`)
+- Open your terminal (e.g., `cmd.exe`)
   - Browse to the `pyqmix_frontend` subfolder of `pyqmix-web`
   - Type: `npm install`
 
