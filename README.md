@@ -22,7 +22,7 @@ The user-visible part of pyqmix-web runs in the web browser. You need a modern b
 ### Set up backend
 - Create a conda virtual environment
 - Activate the virtual environment
-- Insall the dependencies
+- Install the dependencies
   - Type: `conda install flask`
   - Type: `pip install flask_restplus`
   - Type: `pip install pyqmix`
