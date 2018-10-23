@@ -116,6 +116,9 @@ class InitiateOrDisconnectPumps(Resource):
 
     def get(self):
 
+        # TESTING
+        print('TEST: is the config backend set up: ' + config.read_config()['qmix_config_dir'])
+
         # Initiate test scenario
         session_paramters['get_pumps_states_call_count'] +=1
 
@@ -167,6 +170,8 @@ class Pumps(Resource):
     def put(self, pump_id):
         payload = request.json
         action = payload['action']
+
+        print('action: ' + action)
 
         if action == 'referenceMove':
             pump_reference_move(pump_id)

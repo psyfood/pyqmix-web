@@ -46,14 +46,14 @@ class PumpForm extends Component {
     flowRate: {
       'fill': [],
       'empty': [],
-      'bubble': [],
+      'bubbleCycle': [],
       'rinse': [],
       'targetVolume': []
     },
     flowUnit: {
       'fill': "mL/s",
       'empty': "mL/s",
-      'bubble': "mL/s",
+      'bubbleCycle': "mL/s",
       'rinse': "mL/s",
       'targetVolume': "mL/s"
     },
@@ -204,7 +204,6 @@ class PumpForm extends Component {
       case "cL/s":
         factor = 10;
         break;
-      case "mL/min":
         factor = 1/60;
         break;
       case "cL/min":
@@ -313,7 +312,7 @@ class PumpForm extends Component {
   // --- Function to wait for user input --- //
   waitForConfigFilesToBeSet = async () => {
     do {
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise(resolve => setTimeout(resolve, 1000));
     } while (this.state.userEnteredPumpConfiguration === false);
   };
 
@@ -371,7 +370,13 @@ class PumpForm extends Component {
 
     // Update request counter
     await this.asyncSetState({requestCounter: this.state.requestCounter+1});
+    console.log('subform initiated: ' + subform);
+    console.log('reference counter: ' + this.state.requestCounter.toString());
     let requestCount = this.state.requestCounter;
+
+    // Update active Subform, and await the change!
+    await this.asyncSetState({activeSubform: subform});
+
 
     switch (subform) {
       case "referenceMove":
@@ -467,21 +472,25 @@ class PumpForm extends Component {
 
     // Fill with stimulus
     await this.sendCommmandToPumps('fillToOneThird', requestCount);
-
-    // Continue with the SECOND step of the bubble Cycle
     await this.waitForPumpingToFinish();
-    this.toggle('bubbleCycleMiddle');
 
-    // Wait for user feedback and reset state
-    await this.waitBubbleToggle();
-    this.toggle('bubbleCycleMiddle');
+    // Continue with the SECOND step of the bubble Cycle if user did not choose
+    // another pump cycle meanwhile
+    if (requestCount === this.state.requestCounter) {
 
-    // Abort bubble cycle or continue with the second step
-    if (this.state.userEnteredBubbleToggle === "cancel") {
-      this.setState({userEnteredBubbleToggle: ""});
-    } else if (this.state.userEnteredBubbleToggle === "continue") {
-      this.setState({userEnteredBubbleToggle: ""});
-      this.handleBubbleCycleMiddle(requestCount)
+      this.toggle('bubbleCycleMiddle');
+
+      // Wait for user feedback and reset state
+      await this.waitBubbleToggle();
+      this.toggle('bubbleCycleMiddle');
+
+      // Abort bubble cycle or continue with the second step
+      if (this.state.userEnteredBubbleToggle === "cancel") {
+        this.setState({userEnteredBubbleToggle: ""});
+      } else if (this.state.userEnteredBubbleToggle === "continue") {
+        this.setState({userEnteredBubbleToggle: ""});
+        this.handleBubbleCycleMiddle(requestCount)
+      }
     }
   };
 
@@ -492,20 +501,22 @@ class PumpForm extends Component {
 
     // Empty syringes
     await this.sendCommmandToPumps('empty', requestCount);
-
     await this.waitForPumpingToFinish();
-    this.toggle('bubbleCycleEnd');
 
-    // Wait for user feedback and reset state
-    await this.waitBubbleToggle();
-    this.toggle('bubbleCycleEnd');
+    if (requestCount === this.state.requestCounter) {
+      this.toggle('bubbleCycleEnd');
 
-    // Abort bubble cycle or continue with the third step
-    if (this.state.userEnteredBubbleToggle === "cancel") {
-      this.setState({userEnteredBubbleToggle: ""});
-    } else if (this.state.userEnteredBubbleToggle === "continue") {
-      this.setState({userEnteredBubbleToggle: ""});
-      this.handleBubbleCycleEnd(requestCount)
+      // Wait for user feedback and reset state
+      await this.waitBubbleToggle();
+      this.toggle('bubbleCycleEnd');
+
+      // Abort bubble cycle or continue with the third step
+      if (this.state.userEnteredBubbleToggle === "cancel") {
+        this.setState({userEnteredBubbleToggle: ""});
+      } else if (this.state.userEnteredBubbleToggle === "continue") {
+        this.setState({userEnteredBubbleToggle: ""});
+        this.handleBubbleCycleEnd(requestCount)
+      }
     }
   };
 
@@ -556,15 +567,16 @@ class PumpForm extends Component {
   // --- Send pump command to backend --- //
   sendCommmandToPumps = async (action, requestCount) => {
 
-    console.log('test whether the below output makes senses');
+    console.log('send command to backend: ');
     console.log(requestCount === this.state.requestCounter);
+    console.log('requestCount: ' + requestCount.toString() + ' state.requestCounter ' + this.state.requestCounter.toString());
+    await this.waitForPumpingToFinish();
     if (requestCount === this.state.requestCounter) {
-      await this.waitForPumpingToFinish();
-
       let payload;
+      const activeSubform = this.state.activeSubform;
       for (let Index in this.state.selectedPumps) {
         let pumpID = this.state.selectedPumps[Index];
-        payload = await this.makePumpCommand(action, pumpID);
+        payload = await this.makePumpCommand(action, pumpID, activeSubform);
 
         // Send information to pump-specific endpoint
         fetch('/api/pumps/'+pumpID.toString(), {
@@ -580,7 +592,7 @@ class PumpForm extends Component {
   };
 
   // --- Translate action to pump commands --- //
-  makePumpCommand = async (pumpAction, PumpName) => {
+  makePumpCommand = async (pumpAction, PumpName, activeSubform) => {
 
     let pumpCommand;
     let targetVolume;
@@ -591,7 +603,7 @@ class PumpForm extends Component {
 
       // If the command is fillToLevel, empty, or fill
       if (pumpAction === 'fillToLevel') {
-        targetVolume = this.computeVolumeMilliLitres(this.state.activeSubform);
+        targetVolume = this.computeVolumeMilliLitres(activeSubform);
       } else if (pumpAction === 'empty') {
         targetVolume = 0;
       } else if (pumpAction === 'fill') {
@@ -604,7 +616,7 @@ class PumpForm extends Component {
         targetVolume = pump.syringe_volume * 2/3;
       }
 
-      let flowRate = this.computeFlowMilliLitresPerSecond(this.state.activeSubform);
+      let flowRate = this.computeFlowMilliLitresPerSecond(activeSubform);
       pumpCommand = {
         'action': pumpAction,
         'params': {
@@ -756,7 +768,6 @@ class PumpForm extends Component {
                 onSubmit={(e) => {
                   e.preventDefault();
                   this.toggle('referenceMove');
-                  this.setState({activeSubform: 'reference'});
                 }}>
 
             <FormGroup className="input-form">
@@ -790,7 +801,6 @@ class PumpForm extends Component {
                 onSubmit={(e) => {
                   e.preventDefault();
                   this.toggle('fill');
-                  this.setState({activeSubform: 'fill'})
                 }}>
 
             <FormGroup className="input-form">
@@ -863,7 +873,6 @@ class PumpForm extends Component {
                 onSubmit={(e) => {
                   e.preventDefault();
                   this.toggle('empty');
-                  this.setState({activeSubform: 'empty'})
                 }}>
 
             <FormGroup className="input-form">
@@ -936,7 +945,6 @@ class PumpForm extends Component {
                 onSubmit={(e) => {
                   e.preventDefault();
                   this.toggle('bubbleCycleStart');
-                  this.setState({activeSubform: 'bubble'})
                 }}>
 
             <FormGroup className="input-form">
@@ -1032,7 +1040,6 @@ class PumpForm extends Component {
                 onSubmit={(e) => {
                   e.preventDefault();
                   this.toggle('rinse');
-                  this.setState({activeSubform: 'rinse'})
                 }}>
 
             <FormGroup className="input-form">
