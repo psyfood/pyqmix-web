@@ -278,9 +278,7 @@ class PumpForm extends Component {
 
     // Update state on whether the pump configuration is set up if it's not already registered in the state
     if (this.state.isPumpConfigSetUp === false) {
-      await this.getPumpStates();
-      console.log('retrieving pump states from backend');
-      console.log(this.state.isPumpConfigSetUp)
+      await this.getConfigurationInfo();
     }
 
     // User must set up the pump configuration if it was not set up in the backend (only if the user has pressed detect pumps)
@@ -288,7 +286,7 @@ class PumpForm extends Component {
       console.log('Pump configuration was not set up in the backend. User needs to set it up.');
 
       // Update state with available Qmix configutations in the backend
-      await this.getAvailableConfigurations();
+      await this.getConfigurationInfo();
 
       // Modal asks the user to select one of the available config directories by a dropdown
       this.toggle('locateConfigFiles');
@@ -314,7 +312,7 @@ class PumpForm extends Component {
     this.handleConnectPumps();
   };
 
-  getAvailableConfigurations = async () => {
+  getConfigurationInfo = async () => {
     const response = await fetch('/api/config', {
       method: 'get',
       headers: {
@@ -323,8 +321,10 @@ class PumpForm extends Component {
       },
     });
     const json = await response.json();
+    await this.asyncSetState({isPumpConfigSetUp: json['is_config_set_up']});
     await this.asyncSetState({availableConfigurations: json['available_configs']});
     await this.asyncSetState({availableSyringeTypes: json['available_syringes']});
+
     // Use first item as default.
     const defaultConfig = this.state.availableConfigurations[0];
     await this.asyncSetState({selectedQmixConfig: defaultConfig});
@@ -355,10 +355,10 @@ class PumpForm extends Component {
         });
 
         const status = await response.json();
-
         // Pumps were successfully connected
         if (status && payload['pumpInitiate']) {
-          await this.getPumpStates();
+          await this.getConfigurationInfo();
+          await this.getPumpStates()
         }
         // Pumps were unsuccessfully connected
         else if (status === false && payload['pumpInitiate']) {
@@ -381,8 +381,7 @@ class PumpForm extends Component {
 
   deepCopy = (object) => {
     const deepCopyString = JSON.stringify(object);
-    const deepCopyObject = JSON.parse(deepCopyString);
-    return deepCopyObject
+    return JSON.parse(deepCopyString);
   };
 
   handlePumpOperation = async (subform) => {
@@ -654,7 +653,7 @@ class PumpForm extends Component {
     do {
       console.log('Checking whether pumps are still pumping');
       await this.getPumpStates();
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise(resolve => setTimeout(resolve, 1000));
     } while (this.state.pumps.some(x => x.is_pumping));
   };
 
@@ -671,7 +670,6 @@ class PumpForm extends Component {
     console.log('Current pump state:');
     console.log(json);
     await this.asyncSetState({pumps: json['pump_states']});
-    await this.asyncSetState({isPumpConfigSetUp: json['config_setup']});
   };
 
   //  This function is currently not used

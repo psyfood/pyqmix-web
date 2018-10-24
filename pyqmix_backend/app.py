@@ -94,11 +94,14 @@ class SetUpConfig(Resource):
 
     def get(self):
         # Return a list of available config-dirs and send to frontend
-
         list_of_available_configurations = config.get_available_qmix_configs()
         list_of_available_syringe_sizes = list(syringes.keys())
 
-        setup_dict = {'available_configs': list_of_available_configurations,
+        # Return status of pump-setup
+        config_setup = is_config_set_up()
+
+        setup_dict = {'is_config_set_up': config_setup,
+                      'available_configs': list_of_available_configurations,
                       'available_syringes': list_of_available_syringe_sizes}
         return setup_dict
 
@@ -116,9 +119,6 @@ class InitiateOrDisconnectPumps(Resource):
 
     def get(self):
 
-        # TESTING
-        print('TEST: is the config backend set up: ' + config.read_config()['qmix_config_dir'])
-
         # Initiate test scenario
         session_paramters['get_pumps_states_call_count'] +=1
 
@@ -128,10 +128,7 @@ class InitiateOrDisconnectPumps(Resource):
             pump_state = get_pump_state(pump_id)
             pump_states.append(pump_state)
 
-        # Return status of pump-setup
-        config_setup = is_config_set_up()
-
-        system_state = {'config_setup': config_setup, 'pump_states': pump_states}
+        system_state = {'pump_states': pump_states}
 
         return system_state
 
@@ -189,7 +186,7 @@ class Pumps(Resource):
 def is_config_set_up():
 
     if app.config['test_session']:
-        if session_paramters['get_pumps_states_call_count'] < 2:
+        if session_paramters['get_pumps_states_call_count'] < 1:
             return False
         else:
             return True
