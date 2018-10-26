@@ -591,21 +591,28 @@ class PumpForm extends Component {
   // --- Send pump command to backend --- //
   sendCommmandToPumps = async (action, deepCopyState) => {
 
-    await this.waitForPumpingToFinish();
-    if (deepCopyState.requestCounter === this.state.requestCounter) {
-      for (let Index in deepCopyState.selectedPumps) {
-        let pumpID = deepCopyState.selectedPumps[Index];
-        let payload = await this.makePumpCommand(action, pumpID, deepCopyState);
+    // Send command if user did not disconnect pumps.
+    if (this.state.webConnectedToPumps) {
+      await this.waitForPumpingToFinish();
 
-        // Send information to pump-specific endpoint
-        fetch('/api/pumps/'+pumpID.toString(), {
-          method: 'put',
-          headers: {
-            'Accept': 'application/json, text/plain, */*',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(payload)
-        });
+      if (deepCopyState.requestCounter === this.state.requestCounter) {
+        for (let Index in deepCopyState.selectedPumps) {
+          let pumpID = deepCopyState.selectedPumps[Index];
+          let payload = await this.makePumpCommand(action, pumpID, deepCopyState);
+
+          // Send information to pump-specific endpoint if user has not
+          // disconnected pumps
+          if (this.state.webConnectedToPumps) {
+            fetch('/api/pumps/' + pumpID.toString(), {
+              method: 'put',
+              headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(payload)
+            });
+          }
+        }
       }
     }
   };
