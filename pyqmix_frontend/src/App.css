@@ -96,6 +96,13 @@ body {
     /*width: 50%;*/
 }
 
+.outro {
+    text-align: right;
+    color: lightslategrey;
+    font-size: 11px;
+    padding: 0 11px 0 0;
+}
+
 /*.nrep-subform {*/
     /*!*display: table-column;*!*/
 /*}*/

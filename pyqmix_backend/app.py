@@ -2,10 +2,11 @@ from flask import Flask, request, send_from_directory
 from flask_restplus import Api, Resource
 from flask_restplus.fields import Float, Boolean, String, Nested
 from pyqmix import QmixBus, config, QmixPump
+from pyqmix.pump import syringes
+import pyqmix
 import os.path as op
 import sys
 from collections import OrderedDict
-from pyqmix.pump import syringes
 
 # Frontend static folder location depends on whether we are
 # running from PyInstaller or not.
@@ -88,6 +89,11 @@ class Main(Resource):
         else:
             return send_from_directory(static_folder, path)
 
+@api.route('/api/pyqmix')
+class PyqmixSetup(Resource):
+
+    def get(self):
+        return pyqmix.__version__
 
 @api.route('/api/config')
 class SetUpConfig(Resource):
@@ -110,7 +116,6 @@ class SetUpConfig(Resource):
         payload = request.json
         config_name = payload['configName']
         session_paramters['syringe_type'] = payload['syringeType']
-
 
         set_up_config(config_name=config_name)
 

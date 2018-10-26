@@ -1214,26 +1214,55 @@ class PumpForm extends Component {
               </div>
             </FormGroup>
           </Form>
-
         </div>
       </div>
     )
   }
 }
 
+class Outro extends Component {
+
+  state = {
+    pyqmixVersion: ""
+  };
+
+  componentDidMount(){
+    this.getPyqmixVersion();
+  }
+
+  getPyqmixVersion = async () => {
+    const response = await fetch('/api/pyqmix', {
+      method: 'get',
+      headers: {
+        'Accept': 'application/json, text/plain, */*',
+        'Content-Type': 'application/json'
+      },
+    });
+    const pyqmixVersion = await response.json();
+    this.setState({pyqmixVersion: pyqmixVersion});
+  };
+
+  render = () => {
+    return (
+      <p>
+        pyqmix version {this.state.pyqmixVersion}
+      </p>
+    )
+  }
+}
 
 class App extends Component {
   render() {
     return (
       <div className="App">
         <header className="App-header">
-          {/*<img src={logo} className="App-logo" alt="logo" />*/}
           <h1 className="App-title">pyqmix-web</h1>
         </header>
-        {/*<p className="App-intro">*/}
-        {/*</p>*/}
         <div className="entire-pump-form">
           <PumpForm/>
+        </div>
+        <div className="outro entire-pump-form">
+          <Outro/>
         </div>
       </div>
     );
