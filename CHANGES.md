@@ -1,4 +1,4 @@
-2018.10.26
+2018.11.05
 ----------
 - Abort current pump operation if user initiates a new one
 - User can terminate current pump routine, but not modify it   
