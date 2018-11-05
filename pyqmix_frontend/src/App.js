@@ -1243,11 +1243,12 @@ class Outro extends Component {
   };
 
   render = () => {
-    return (
-      <p>
-        pyqmix version {this.state.pyqmixVersion}
-      </p>
-    )
+    return null;
+    // return (
+    //   <p>
+    //     pyqmix version {this.state.pyqmixVersion}
+    //   </p>
+    // )
   }
 }
 
