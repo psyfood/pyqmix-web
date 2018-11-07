@@ -1,3 +1,7 @@
+2018.11.07
+----------
+- Display version number of installed `pyqmix` in the frontend
+
 2018.11.05
 ----------
 - Abort current pump operation if user initiates a new one
