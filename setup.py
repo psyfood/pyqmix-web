@@ -8,9 +8,6 @@ try:
 except ImportError:
     raise sys.exit('Could not import setuptools.')
 
-
-files = glob.glob('pyqmix_frontend/build/*')
-
 setup(
     packages=['pyqmix_web', 'pyqmix_web.frontend'],
     package_dir={'pyqmix_web': 'pyqmix_backend',
