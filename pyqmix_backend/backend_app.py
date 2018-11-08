@@ -8,6 +8,7 @@ import os.path as op
 import sys
 from collections import OrderedDict
 
+
 # Frontend static folder location depends on whether we are
 # running from PyInstaller or not.
 if getattr(sys, '_MEIPASS', None) is None:
@@ -21,6 +22,7 @@ print('Serving static files from ' + static_folder)
 
 app = Flask(__name__, static_folder=static_folder)
 api = Api(app)
+
 
 session_paramters = {
     'bus': None,
@@ -72,12 +74,15 @@ stop_pumps = api.model('Stop pumps', {
                     required=True,
                     example=True)})
 
+
 ## --- Endpoints --- ##
+
 
 @api.route('/api/')
 class Main(Resource):
 
     pass
+
 
 @api.route('/pyqmix-web/', defaults={'path': ''})
 @api.route('/pyqmix-web/<path:path>')
@@ -89,11 +94,13 @@ class Main(Resource):
         else:
             return send_from_directory(static_folder, path)
 
+
 @api.route('/api/pyqmix')
 class PyqmixSetup(Resource):
 
     def get(self):
         return pyqmix.__version__
+
 
 @api.route('/api/config')
 class SetUpConfig(Resource):
@@ -118,6 +125,7 @@ class SetUpConfig(Resource):
         session_paramters['syringe_type'] = payload['syringeType']
 
         set_up_config(config_name=config_name)
+
 
 @api.route('/api/pumps')
 class InitiateOrDisconnectPumps(Resource):
@@ -150,6 +158,7 @@ class InitiateOrDisconnectPumps(Resource):
             status = disconnect_pumps()
 
         return status
+
 
 @api.route('/api/stop')
 class StopPumps(Resource):
@@ -186,7 +195,9 @@ class Pumps(Resource):
 
         return 201
 
+
 ## --- Functions --- ##
+
 
 def is_config_set_up():
 
@@ -201,6 +212,7 @@ def is_config_set_up():
         else:
             return True
 
+
 def set_up_config(config_name):
 
     if app.config['test_session']:
@@ -208,6 +220,7 @@ def set_up_config(config_name):
               f'config name: {config_name}')
     else:
         config.set_qmix_config(config_name=config_name)
+
 
 def connect_pumps():
 
@@ -253,6 +266,7 @@ def disconnect_pumps():
 
     return True
 
+
 def get_pump_state(pump_id):
 
     pump = session_paramters['pumps'][str(pump_id)]
@@ -290,6 +304,7 @@ def pump_set_fill_level(pump_id, target_volume, flow_rate):
 
         session_paramters['pumps'][str(pump_id)].set_fill_level(level=target_volume, flow_rate=flow_rate, wait_until_done=False)
 
+
 def pump_reference_move(pump_id):
 
     if app.config['test_session']:
@@ -297,12 +312,14 @@ def pump_reference_move(pump_id):
     else:
         session_paramters['pumps'][str(pump_id)].calibrate()
 
+
 def set_syringe_type(pump_id):
 
     pump = session_paramters['pumps'][str(pump_id)]
     syringe_type = session_paramters['syringe_type']
 
     pump.set_syringe_params_by_type(syringe_type)
+
 
 def standardize_syringe_parameter(pump_id):
 
@@ -321,7 +338,5 @@ def standardize_syringe_parameter(pump_id):
         pump.set_volume_unit(prefix='milli', unit='litres')
 
 
-
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
-

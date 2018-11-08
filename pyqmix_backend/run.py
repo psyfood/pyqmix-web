@@ -1,5 +1,5 @@
 import webbrowser
-from .app import app
+from .backend_app import app
 import threading
 import time
 from urllib import request
