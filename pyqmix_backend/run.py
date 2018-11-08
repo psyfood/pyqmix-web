@@ -1,9 +1,9 @@
 import webbrowser
-from app import app
+from .app import app
 import threading
 import time
 from urllib import request
-import os, sys
+
 """
 Start Flask server and open browser window once done.
 Approach adopted from https://github.com/pallets/flask/issues/2178#issuecomment-292765792
