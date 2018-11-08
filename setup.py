@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import sys
-import glob
+
 
 try:
     from setuptools import setup  #, find_packages
