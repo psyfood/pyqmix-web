@@ -10,10 +10,15 @@ from collections import OrderedDict
 
 
 # Frontend static folder location depends on whether we are
-# running from PyInstaller or not.
+# running from the pyqmix_web package, from PyInstaller, or "directly"
+# (development mode).
 if getattr(sys, '_MEIPASS', None) is None:
     RUNNING_FROM_PYINSTALLER = False
-    static_folder = '../pyqmix_frontend/build'
+
+    if __package__ == 'pyqmix_backend':  # running "directly"
+        static_folder = '../pyqmix_frontend/build'
+    elif __package__ == 'pyqmix_web':  # running from package
+        static_folder = op.join(op.dirname(__file__), 'frontend/build')
 else:
     RUNNING_FROM_PYINSTALLER = True
     static_folder = op.join(sys._MEIPASS, 'pyqmix-web')
