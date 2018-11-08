@@ -12,8 +12,8 @@ except ImportError:
 files = glob.glob('pyqmix_frontend/build/*')
 
 setup(
-    packages=['pyqmix_web', 'pyqmix_web.fronted'],
+    packages=['pyqmix_web', 'pyqmix_web.frontend'],
     package_dir={'pyqmix_web': 'pyqmix_backend',
-                 'pyqmix_web.fronted': 'pyqmix_frontend'},
+                 'pyqmix_web.frontend': 'pyqmix_frontend'},
     include_package_data=True  # Include files from MANIFEST.in
 )
