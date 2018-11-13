@@ -1,3 +1,7 @@
+2018.11.12
+----------
+- Add versioneer
+
 2018.11.07
 ----------
 - Display version number of installed `pyqmix` in the frontend
