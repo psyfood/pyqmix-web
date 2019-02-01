@@ -1,3 +1,7 @@
+2019.1
+------
+- Update to `react-scripts` 2.1.3
+
 2018.11.07
 ----------
 - Display version number of installed `pyqmix` in the frontend
