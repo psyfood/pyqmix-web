@@ -1,6 +1,10 @@
 # pyqmix-web
 Remote-control interface and web-app for pyqmix
 
+[![Latest PyPI Release](https://img.shields.io/pypi/v/pyqmix-web.svg)](https://pypi.org/project/pyqmix-web/)
+[![Conda Version](https://img.shields.io/conda/vn/conda-forge/pyqmix-web.svg)](https://anaconda.org/conda-forge/pyqmix-web)
+
+
 ## Operate via downloadable executable
 The user-visible part of pyqmix-web runs in the web browser. You need a modern browser to run the application. Recent versions of Chrome, Firefox, and Safari work well; Microsoft Internet Explorer is not supported.
 
