@@ -4,4 +4,4 @@ include README.md
 include CHANGES.md
 include AUTHORS.md
 include versioneer.py
-include _version.py
+include pyqmix_backend/_version.py
