@@ -4,7 +4,7 @@ import sys
 import versioneer
 
 try:
-    from setuptools import setup  #, find_packages
+    from setuptools import setup
 except ImportError:
     raise sys.exit('Could not import setuptools.')
 
