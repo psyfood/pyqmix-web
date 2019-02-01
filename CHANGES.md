@@ -1,5 +1,5 @@
-2018.11.12
-----------
+2019.1
+------
 - Turn `pyqmix-web` into a proper Python package that can be published on PyPI
 - Add versioneer
 
