@@ -93,7 +93,7 @@ class Main(Resource):
 @api.route('/pyqmix-web/<path:path>')
 class Main(Resource):
     def get(self, path):
-        print('the path is ' + path)
+        # print('the path is ' + path)
         if path == '':
             return send_from_directory(static_folder, 'index.html')
         else:
