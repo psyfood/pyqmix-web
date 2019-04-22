@@ -2,11 +2,6 @@
   text-align: center;
 }
 
-.App-logo {
-  animation: App-logo-spin infinite 5s linear;
-  height: 40px;
-}
-
 .App-header {
   background-color: #222;
   height: 80px;
@@ -19,24 +14,13 @@
   font-size: 2em;
 }
 
-.App-intro {
-  font-size: large;
-}
-
-@keyframes App-logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-
-/*Mystyle is below*/
 body {
     text-align: center;
 }
 
+/* ALL of the webpage execpt the pyqmix-version number */
 .entire-pump-form {
     background-color: white;
-    /*border: 2px solid gray;*/
     width: 100%;
     max-width: 770px;
     min-width: 430px;
@@ -45,34 +29,40 @@ body {
     margin-right: auto;
 }
 
+/* Area above entire-input-form */
 .button-group {
   padding: 7px 0 7px 0;
 }
 
+/* Web-page except buttons at the top */
 .entire-input-form {
     padding: 15px 10px 10px 10px;
     /*display: table;*/
 }
 
+/* Each individual pump operation option */
 .input-form {
-  /*display: table-row;*/
   border: 2px solid black;
   padding: 1px 1px 1px 1px;
-  /*margin: 10px 5px 5px 0;*/
 }
 
+/* This is the individual options _within_ each pump operation option */
 .input-subform {
-  /*display: inline-block;*/
-  padding: 5px 5px 5px 5px;
-  /*margin: 5px 5px 5px 5px;*/
-  /*vertical-align: top;*/
+  padding: 5px 2px 5px 2px;
 }
 
+/* The leftmost input-subforms. The ones that have buttons */
 .button-subform {
     text-align: left;
     padding: 5px 5px 5px 0;
 }
 
+/* The build applies negative margins to the row element */
+.row {
+    margin: 0 0 0 0;
+}
+
+/* Space between input field and button */
 @media only screen and (min-width:575px) {
     .button-subform {
         text-align: right;
@@ -80,20 +70,12 @@ body {
     }
 }
 
-.text-area-input {
-    max-width: 95%;
-}
-
 .text-modal {
-    /*white-space: pre-wrap;*/
     white-space: pre-line;
 }
 
 .form-control {
     padding-left: 4px;
-    /*padding: 5px 5px 5px 0;*/
-    color: red;
-    /*width: 50%;*/
 }
 
 .outro {
@@ -102,17 +84,3 @@ body {
     font-size: 11px;
     padding: 0 11px 0 0;
 }
-
-/*.nrep-subform {*/
-    /*!*display: table-column;*!*/
-/*}*/
-
-/*.flowrate-subform {*/
-    /*!*margin: 0 0 0 0;*!*/
-
-    /*!*display: table-column;*!*/
-/*}*/
-
-/*.volume-subform {*/
-    /*!*display: table-column;*!*/
-/*}*/
