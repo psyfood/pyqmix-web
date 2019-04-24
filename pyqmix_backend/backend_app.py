@@ -112,7 +112,17 @@ class SetUpConfig(Resource):
 
     def get(self):
         # Return a list of available config-dirs and send to frontend
-        list_of_available_configurations = config.get_available_qmix_configs()
+        try:
+            list_of_available_configurations = config.get_available_qmix_configs()
+        except:
+            list_of_available_configurations = []  # If the default configuration does not exist
+
+        if list_of_available_configurations:
+            configuration_path = config.DEFAULT_CONFIGS_DIR
+        else:  # If the default configuration path does not exist or if there are no configurations
+            configuration_path = op.expanduser('~')
+        list_of_available_configurations = config.get_available_qmix_configs(configs_dir=configuration_path)
+
         list_of_available_syringe_sizes = list(syringes.keys())
 
         # Return status of pump-setup
@@ -120,7 +130,8 @@ class SetUpConfig(Resource):
 
         setup_dict = {'is_config_set_up': config_setup,
                       'available_configs': list_of_available_configurations,
-                      'available_syringes': list_of_available_syringe_sizes}
+                      'available_syringes': list_of_available_syringe_sizes,
+                      'configuration_path': configuration_path}
         return setup_dict
 
     @api.expect(config_setup)
@@ -130,6 +141,21 @@ class SetUpConfig(Resource):
         session_paramters['syringe_type'] = payload['syringeType']
 
         set_up_config(config_name=config_name)
+
+
+@api.route('/api/config_update')
+class UpdateConfig(Resource):
+
+    def put(self):
+        payload = request.json
+        configuration_path = payload['configPath']
+        try:
+            list_of_available_configurations = config.get_available_qmix_configs(configs_dir=configuration_path)
+        except:  # Return empty list if path does not exist
+            list_of_available_configurations = []
+        setup_dict = {'available_configs': list_of_available_configurations}
+
+        return setup_dict
 
 
 @api.route('/api/pumps')
@@ -268,6 +294,7 @@ def disconnect_pumps():
     print(f'Bus after "closing": {session_paramters["bus"]}')
 
     session_paramters['pumps'] = {}
+    config.delete_config()
 
     return True
 
@@ -296,8 +323,8 @@ def get_pump_state(pump_id):
 
     return pump_status
 
-def pump_set_fill_level(pump_id, target_volume, flow_rate):
 
+def pump_set_fill_level(pump_id, target_volume, flow_rate):
     if app.config['test_session']:
         print(f'Starting virtual pump: {pump_id} and setting '
               f'target_volume to {target_volume} mL '
