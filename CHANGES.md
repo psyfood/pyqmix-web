@@ -5,6 +5,7 @@
   in their terminal after installation, which will fire up the backend and
   open the browser
 - Add versioneer
+- Enable user to specify pump configuration directory
 - Update to `react-scripts` 2.1.3
 
 2018.11.07

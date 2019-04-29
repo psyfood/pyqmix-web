@@ -12,10 +12,11 @@ class PumpForm extends Component {
 
     // System setup
     webConnectedToPumps: false,  // Does the website think the pumps are connected (based on user-input, not backend)
-    isPumpConfigSetUp: false,  // Are the pumps set up in the backend
+    isPumpConfigSetUp: false,  // Are the pumps configured in the backend
     userEnteredPumpConfiguration: false,  // Method to wait for user input on config-name and pump-type
     availableConfigurations: [],
     availableSyringeTypes: [],
+    configurationPath: "",
     selectedQmixConfig: "",
     selectedSyringeType: "",
     userEnteredBubbleToggle: "",
@@ -78,6 +79,10 @@ class PumpForm extends Component {
   // --- Update state by Configuration and Syringe Size fields --- //
   handleConfigNameChange = (e) => this.setState({selectedQmixConfig: e.target.innerText});
   handleSyringeTypeChange = (e) => this.setState({selectedSyringeType: e.target.innerText});
+  handleConfigPathChange = (e) => {
+    this.setState({configurationPath: e.target.value});
+    this.updateAvailableConfigurations(e.target.value);
+  };
   handleLocatingConfig = () => {
     this.toggle('locateConfigFiles');
     this.setState({userEnteredPumpConfiguration: true})
@@ -321,15 +326,35 @@ class PumpForm extends Component {
       },
     });
     const json = await response.json();
-    await this.asyncSetState({isPumpConfigSetUp: json['is_config_set_up']});
+     // Uncommented since I want to configure pumps every time I press 'Detect Pumps'
+    // await this.asyncSetState({isPumpConfigSetUp: json['is_config_set_up']});
+    await this.asyncSetState({isPumpConfigSetUp: false});
     await this.asyncSetState({availableConfigurations: json['available_configs']});
     await this.asyncSetState({availableSyringeTypes: json['available_syringes']});
+    await this.asyncSetState({configurationPath: json['configuration_path']});
 
     // Use first item as default.
     const defaultConfig = this.state.availableConfigurations[0];
     await this.asyncSetState({selectedQmixConfig: defaultConfig});
     const defaultSyringeType = this.state.availableSyringeTypes[0];
     await this.asyncSetState({selectedSyringeType: defaultSyringeType})
+  };
+
+  updateAvailableConfigurations = async (configPath) => {
+    let payload = {configPath: configPath};
+    const response = await fetch('/api/config_update', {
+      method: 'put',
+      headers: {
+        'Accept': 'application/json, text/plain, */*',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+    const json = await response.json();
+    await this.asyncSetState({availableConfigurations: json['available_configs']});
+
+    const defaultConfig = this.state.availableConfigurations[0];
+    await this.asyncSetState({selectedQmixConfig: defaultConfig});
   };
 
   // --- Function to wait for user input --- //
@@ -713,26 +738,47 @@ class PumpForm extends Component {
                     onSubmit={(e) => {
                       e.preventDefault();
                     }}>
-                {/*Dropdown for config name*/}
-                <FormGroup>
-                  <Dropdown isOpen={this.state.modal['configDropDownOpen']}
-                            toggle={() => this.toggle('configDropDownOpen')}>
-                    <DropdownToggle caret>
-                      {this.state.selectedQmixConfig}
-                    </DropdownToggle>
-                    <DropdownMenu>
-                      {this.state.availableConfigurations.map(config =>
-                        <DropdownItem
-                          key={config}
-                          onClick={this.handleConfigNameChange}>
-                          {config}
-                        </DropdownItem>
-                      )}
-                    </DropdownMenu>
-                  </Dropdown>
-                </FormGroup>
+
+                <form>
+                  <div class="form-row">
+
+                    <div class="col">
+                    {/*Specify configuration directory*/}
+                    <h6>Configuration directory:</h6>
+                    <FormGroup>
+                      <input type="text"
+                             className="form-control"
+                             onChange={this.handleConfigPathChange}
+                             placeholder={this.state.configurationPath}/>
+                    </FormGroup>
+                    </div>
+
+                    <div className="col">
+                    {/*Dropdown to choose configuration*/}
+                    <h6>Select configuration:</h6>
+                    <FormGroup>
+                      <Dropdown isOpen={this.state.modal['configDropDownOpen']}
+                                toggle={() => this.toggle('configDropDownOpen')}>
+                        <DropdownToggle caret>
+                          {this.state.selectedQmixConfig}
+                        </DropdownToggle>
+                        <DropdownMenu>
+                          {this.state.availableConfigurations.map(config =>
+                              <DropdownItem
+                                  key={config}
+                                  onClick={this.handleConfigNameChange}>
+                                {config}
+                              </DropdownItem>
+                          )}
+                        </DropdownMenu>
+                      </Dropdown>
+                    </FormGroup>
+                    </div>
+                  </div>
+                </form>
 
                 <FormGroup>
+                  <h6>Select syringe type:</h6>
                   <Dropdown isOpen={this.state.modal['syringeDropDownOpen']}
                             toggle={() => this.toggle('syringeDropDownOpen')}>
                     <DropdownToggle caret>
@@ -755,6 +801,7 @@ class PumpForm extends Component {
 
             <ModalFooter>
               <Button color="success"
+                      disabled={this.state.availableConfigurations.length === 0}
                       onClick={this.handleLocatingConfig}> Continue </Button>
               <Button color="danger"
                       onClick={() => this.toggle('locateConfigFiles')}> Cancel </Button>
@@ -765,8 +812,15 @@ class PumpForm extends Component {
                  className={this.props.className}>
             <ModalHeader >Error - no pumps were detected.</ModalHeader>
             <ModalBody>
-              Check that (1) the pumps are powered on and connected to the computer, and (2) that the bus is not
-              connected already. Then try again.
+              Ensure that:
+              <ul>
+                <li>You followed the gustometer installation <a href="https://github.com/psyfood/pyqmix#gustometer-setup">instructions.</a></li>
+                <li>That you selected a valid pump configuration.</li>
+                <li>That the pumps are powered on and connected to the computer.</li>
+                <li>That the bus is not in use by another program, for example QmixElements.</li>
+                <li>If the above approaches are unsuccessful, then try adding the directory of the Qmix SDK DLL's to the Windows path variable.</li>
+              </ul>
+              Then try again.
             </ModalBody>
             <ModalFooter>
               <Button color="success"
