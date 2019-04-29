@@ -1238,8 +1238,11 @@ class Outro extends Component {
         'Content-Type': 'application/json'
       },
     });
-    const pyqmixVersion = await response.json();
+
+    var pyqmixVersion;
+    pyqmixVersion = response.ok ? await response.json() : "unknown";
     this.setState({pyqmixVersion: pyqmixVersion});
+
   };
 
   render = () => {

@@ -1,9 +1,9 @@
 import webbrowser
-from app import app
+from .backend_app import app
 import threading
 import time
 from urllib import request
-import os, sys
+
 """
 Start Flask server and open browser window once done.
 Approach adopted from https://github.com/pallets/flask/issues/2178#issuecomment-292765792
@@ -12,7 +12,7 @@ Approach adopted from https://github.com/pallets/flask/issues/2178#issuecomment-
 INDEX_URL = 'http://localhost:5000/pyqmix-web/'
 
 
-def open_browser():
+def open_browser_():
     print('server starting...')
 
     while True:
@@ -28,7 +28,13 @@ def open_browser():
                     new=1, autoraise=True)
 
 
-threading.Thread(target=open_browser).start()
-# start server
-app.run(host='0.0.0.0')
+def run(open_browser=True):
+    if open_browser:
+        threading.Thread(target=open_browser_).start()
 
+    # start server
+    app.run(host='0.0.0.0')
+
+
+if __name__ == '__main__':
+    run(open_browser=True)

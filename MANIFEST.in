@@ -1,0 +1,7 @@
+graft pyqmix_frontend/build
+include LICENSE
+include README.md
+include CHANGES.md
+include AUTHORS.md
+include versioneer.py
+include pyqmix_backend/_version.py

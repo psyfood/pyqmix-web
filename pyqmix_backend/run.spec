@@ -8,9 +8,6 @@ import os
 spec_root = os.path.abspath(SPECPATH)
 
 
-block_cipher = None
-
-
 a = Analysis(['run.py'],
              pathex=[spec_root],
              binaries=[],
@@ -22,8 +19,10 @@ a = Analysis(['run.py'],
              win_no_prefer_redirects=False,
              win_private_assemblies=False,
              cipher=block_cipher)
+
 pyz = PYZ(a.pure, a.zipped_data,
-             cipher=block_cipher)
+          cipher=None)
+
 exe = EXE(pyz,
           a.scripts,
           a.binaries,
