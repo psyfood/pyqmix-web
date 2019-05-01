@@ -7,6 +7,7 @@
   open the browser
 - Add versioneer
 - Enable user to specify pump configuration directory
+- Styling of frontend served via the build
 - Update to `react-scripts` 2.1.3
 
 2018.11.07

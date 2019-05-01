@@ -44,4 +44,4 @@ This will create a run.spec file in the backend directory.
 3. Activate the virtual environment
 4. Type: `pyinstaller --clean run.spec`
 
-This generates a `run.exe` file inside the backend's `dist` folder. 
+This generates a `.exe` file inside the backend's `dist` folder. 

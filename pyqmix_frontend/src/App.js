@@ -730,7 +730,7 @@ class PumpForm extends Component {
           </Button>
 
           <Modal isOpen={this.state.modal['locateConfigFiles']}
-                 className={this.props.className}>
+                 className="modal-input">
             <ModalHeader>Select a pump configuration</ModalHeader>
             {/*<ModalBody></ModalBody>*/}
             <ModalHeader>
@@ -809,7 +809,7 @@ class PumpForm extends Component {
           </Modal>
 
           <Modal isOpen={this.state.modal['noConfigOrDllFound']}
-                 className={this.props.className}>
+                 className="modal-input">
             <ModalHeader >Error - no pumps were detected.</ModalHeader>
             <ModalBody>
               Ensure that:
@@ -860,7 +860,8 @@ class PumpForm extends Component {
                           disabled={this.state.selectedPumps.length === 0}
                   > Reference Move </Button>
                   <FormText>Calibrate the selected pumps.</FormText>
-                  <Modal isOpen={this.state.modal['referenceMove']} className={this.props.className}>
+                  <Modal isOpen={this.state.modal['referenceMove']}
+                         className="modal-input">
                     <ModalHeader >Reference Move</ModalHeader>
                     <ModalBody>
                       Detach all syringes from the pumps before continuing.
@@ -894,7 +895,8 @@ class PumpForm extends Component {
                   > Fill Cycle </Button>
                   <FormText>Fill & empty the syringe multiple times. Ends with a filled syringe.</FormText>
 
-                  <Modal isOpen={this.state.modal['fill']} className={this.props.className}>
+                  <Modal isOpen={this.state.modal['fill']}
+                         className="modal-input">
                     <ModalHeader>Fill</ModalHeader>
                     <ModalBody>
                       Insert the inlet tube into the stimulus reservoir and
@@ -971,7 +973,7 @@ class PumpForm extends Component {
                   <FormText>Empty & fill the syringe multiple times. Ends with an empty syringe.</FormText>
 
                   <Modal isOpen={this.state.modal['empty']}
-                         className={this.props.className}>
+                         className="modal-input">
                     <ModalHeader>Empty</ModalHeader>
                     <ModalBody>
                       Remove the inlet tube from the stimulus reservoir and
@@ -1045,7 +1047,7 @@ class PumpForm extends Component {
                   > Bubble Cycle </Button>
                   <FormText>Guided procedure to remove air bubbles trapped in the syringe. Ends with a filled syringe.</FormText>
                   <Modal isOpen={this.state.modal['bubbleCycleStart']}
-                         className={this.props.className}>
+                         className="modal-input">
                     <ModalHeader>Bubble Cycle</ModalHeader>
                     <ModalBody>
                       Insert the inlet tube into the stimulus reservoir.
@@ -1060,7 +1062,7 @@ class PumpForm extends Component {
                     </ModalFooter>
                   </Modal>
                   <Modal isOpen={this.state.modal['bubbleCycleMiddle']}
-                         className={this.props.className}>
+                         className="modal-input">
                     <ModalHeader>Bubble Cycle</ModalHeader>
                     <ModalBody>
                       Remove the inlet tube from the stimulus reservoir to aspirate air.
@@ -1077,7 +1079,7 @@ class PumpForm extends Component {
                     </ModalFooter>
                   </Modal>
                   <Modal isOpen={this.state.modal['bubbleCycleEnd']}
-                         className={this.props.className}>
+                         className="modal-input">
                     <ModalHeader>Bubble Cycle</ModalHeader>
                     <ModalBody>
                       Insert the inlet tube into the stimulus reservoir.
@@ -1140,7 +1142,7 @@ class PumpForm extends Component {
                   > Rinse Cycle </Button>
                   <FormText>Empty & fill the syringe multiple times. Ends with an empty syringe.</FormText>
                   <Modal isOpen={this.state.modal['rinse']}
-                         className={this.props.className}>
+                         className="modal-input">
                     <ModalHeader>Rinse</ModalHeader>
                     <ModalBody>
                       Insert the inlet tube into the rinsing fluid
