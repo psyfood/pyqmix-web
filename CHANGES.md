@@ -1,5 +1,6 @@
 2019.1
 ------
+- Improve, fix, and update how to create an executable
 - Turn `pyqmix-web` into a proper Python package that can be published on PyPI
 - Add entry point script, such that the user can now simply enter `pyqmix-web`
   in their terminal after installation, which will fire up the backend and
