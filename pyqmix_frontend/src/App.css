@@ -70,8 +70,8 @@ body {
     }
 }
 
-.text-modal {
-    white-space: pre-line;
+.modal-input {
+    text-align: left;
 }
 
 .form-control {

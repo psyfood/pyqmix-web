@@ -1,11 +1,13 @@
 2019.1
 ------
+- Improve, fix, and update how to create an executable
 - Turn `pyqmix-web` into a proper Python package that can be published on PyPI
 - Add entry point script, such that the user can now simply enter `pyqmix-web`
   in their terminal after installation, which will fire up the backend and
   open the browser
 - Add versioneer
 - Enable user to specify pump configuration directory
+- Styling of frontend served via the build
 - Update to `react-scripts` 2.1.3
 
 2018.11.07
