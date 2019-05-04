@@ -1,0 +1,4 @@
+flask
+flask-restplus
+pyqmix
+-e .

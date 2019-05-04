@@ -1,3 +1,7 @@
+2019.2
+------
+- Add requirements.txt file to create pypi package
+
 2019.1
 ------
 - Improve, fix, and update how to create an executable
