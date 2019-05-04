@@ -1,3 +1,7 @@
+2019.1.1
+--------
+- Update `react-scripts` to 3.0.0
+
 2019.1
 ------
 - Improve, fix, and update how to create an executable
