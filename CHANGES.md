@@ -1,3 +1,8 @@
+2019.1.1
+--------
+- Get rid of potential caching problems by disabling offline functionality of
+  the frontend (i.e. we have disabled the service worker)
+
 2019.1
 ------
 - Improve, fix, and update how to create an executable
