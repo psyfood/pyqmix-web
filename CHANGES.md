@@ -2,7 +2,8 @@
 --------
 - Get rid of potential caching problems by disabling offline functionality of
   the frontend (i.e. we have disabled the service worker)
-- Update `react-scripts` to 3.0.0
+- Update `react-scripts` to 3.0.0, `react-dom` to 16.8.6, and `bootstrap`
+  to 4.3.1
 
 2019.1
 ------
