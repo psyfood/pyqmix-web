@@ -3,6 +3,7 @@
 - Get rid of potential caching problems by disabling offline functionality of
   the frontend (i.e. we have disabled the service worker)
 - Update `react-scripts` to 3.0.0
+- Enable running pyqmix-web as an entry-point 
 
 2019.1
 ------

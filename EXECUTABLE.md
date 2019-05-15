@@ -12,6 +12,7 @@ Check out the `app.py` file in this repository.
 - Install the required dependencies: ` pip install flask flask-restplus pyqmix`. The executable will only work if flask and flask-restplus are installed via pip. 
 - Install PyInstaller: `pip install PyInstaller`
 - The newest `jsonschema` module does not work with PyInstaller. Instead, use `jsonchema` in an older version, for example: 2.6.0.    
+- Install pyqmix-web: Browse to the `pyqmix-web` root directory and run `pip install .`
 
 ## Create a production build of the React frontend
 1. Open a terminal
@@ -44,4 +45,4 @@ This will create a run.spec file in the backend directory.
 3. Activate the virtual environment
 4. Type: `pyinstaller --clean run.spec`
 
-This generates a `.exe` file inside the backend's `dist` folder. 
+This generates an `.exe` file inside the backend's `dist` folder. 
