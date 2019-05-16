@@ -1,5 +1,5 @@
 import webbrowser
-from pyqmix_backend.backend_app import app
+from pyqmix_web.backend_app import app
 import threading
 import time
 from urllib import request
