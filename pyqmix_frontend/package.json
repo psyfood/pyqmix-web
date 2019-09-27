@@ -5,11 +5,11 @@
   "proxy": "http://localhost:5000/",
   "homepage": "/pyqmix-web",
   "dependencies": {
-    "bootstrap": "^4.1.2",
+    "bootstrap": "^4.3.1",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
     "react-scripts": "^3.0.0",
-    "reactstrap": "^6.3.0"
+    "reactstrap": "^6.5.0"
   },
   "scripts": {
     "start": "react-scripts start",
