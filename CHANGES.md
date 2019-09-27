@@ -2,7 +2,8 @@
 -------------------------
 - Get rid of potential caching problems by disabling offline functionality of
   the frontend (i.e. we have disabled the service worker)
-- Update `react-scripts` to 3.0.0, `bootstrap` to 4.3.1, and `reactstrap` to 8.0.1
+- Update `react` and `react-dom` to 16.9.0, `react-scripts` to 3.0.0,
+  `bootstrap` to 4.3.1, and `reactstrap` to 8.0.1
 - Enable running pyqmix-web as an entry-point
 
 2019.1
