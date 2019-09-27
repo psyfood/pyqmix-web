@@ -738,11 +738,9 @@ class PumpForm extends Component {
                     onSubmit={(e) => {
                       e.preventDefault();
                     }}>
+                 <div className="form-row">
 
-                <form>
-                  <div class="form-row">
-
-                    <div class="col">
+                    <div className="col">
                     {/*Specify configuration directory*/}
                     <h6>Configuration directory:</h6>
                     <FormGroup>
@@ -775,7 +773,6 @@ class PumpForm extends Component {
                     </FormGroup>
                     </div>
                   </div>
-                </form>
 
                 <FormGroup>
                   <h6>Select syringe type:</h6>

@@ -5,6 +5,7 @@
 - Update `react` and `react-dom` to 16.9.0, `react-scripts` to 3.0.0,
   `bootstrap` to 4.3.1, and `reactstrap` to 8.0.1
 - Enable running pyqmix-web as an entry-point
+- Fix a minor (display) bug in the frontend
 
 2019.1
 ------
