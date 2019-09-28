@@ -8,6 +8,8 @@
 - Fix a minor (display) bug in the frontend
 - Improve developers' documentation.
 - Frontend now looks for all assets placed relative to "index.html"
+- The frontend title is now fixed on top and hovering about all other
+  content while scrolling
 
 2019.1
 ------
