@@ -10,7 +10,6 @@ class RepetitionsInput extends Component {
   render = () => {
     return <Input type="number"
                   value={this.props.value}
-                  name={this.props.name}
                   onChange={this.props.onChange}
                   onBlur={this.props.onBlur}
                   min="1"
@@ -24,7 +23,6 @@ class FlowRateInput extends Component {
   render = () => {
     return <Input type="number"
                   value={this.props.value}
-                  name={this.props.name}
                   onChange={this.props.onChange}
                   onBlur={this.props.onBlur}
                   pattern="\d+((\.)\d+)?"
