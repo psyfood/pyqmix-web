@@ -852,7 +852,7 @@ class PumpForm extends Component {
             <FormGroup className="input-form">
 
               <div className="row">
-                <div className="col-sm-3 input-subform button-subform">
+                <div className="col-sm input-subform button-subform">
                   <Button color="success"
                           disabled={this.state.selectedPumps.length === 0}
                   > Reference Move </Button>
@@ -869,9 +869,11 @@ class PumpForm extends Component {
                     </ModalFooter>
                   </Modal>
                 </div>
-                <div className="col-sm-3"></div>
-                <div className="col-sm-3"></div>
-                <div className="col-sm-3"></div>
+
+                {/* Just here to ensure correct grid spacing */}
+                <div className="col-sm input-subform"></div>
+                <div className="col-sm input-subform"></div>
+                <div className="col-sm input-subform"></div>
               </div>
             </FormGroup>
           </Form>
@@ -886,7 +888,7 @@ class PumpForm extends Component {
             <FormGroup className="input-form">
               <div className="row">
 
-                <div className="col-sm-3 input-subform button-subform">
+                <div className="col-sm input-subform button-subform">
                   <Button color="success"
                           disabled={this.state.selectedPumps.length === 0}
                   > Fill Cycle </Button>
@@ -911,7 +913,7 @@ class PumpForm extends Component {
                 </div>
 
 
-                <div className="col-sm-3 input-subform nrep-subform">
+                <div className="col-sm input-subform nrep-subform">
                   <Input type="number"
                          className="foo"
                          value={this.state.repetitions['fill']}
@@ -923,9 +925,10 @@ class PumpForm extends Component {
                          required/>
                 </div>
 
-                <div className="col-sm-3 input-subform volume-subform"></div>
+                {/* Just here to ensure correct grid spacing */}
+                <div className="col-sm input-subform"></div>
 
-                <div className="col-sm-3 input-subform flowrate-subform">
+                <div className="col-sm input-subform flowrate-subform">
                   <Input type="number"
                          value={this.state.flowRate['fill']}
                          pattern="\d+((\.)\d+)?"
@@ -963,7 +966,7 @@ class PumpForm extends Component {
             <FormGroup className="input-form">
               <div className="row">
 
-                <div className="col-sm-3 input-subform button-subform">
+                <div className="col-sm input-subform button-subform">
                   <Button color="success"
                           disabled={this.state.selectedPumps.length === 0}
                   > Empty Cycle </Button>
@@ -986,7 +989,7 @@ class PumpForm extends Component {
                 </div>
 
 
-                <div className="col-sm-3 input-subform nrep-subform">
+                <div className="col-sm input-subform nrep-subform">
                   <Input type="number"
                          value={this.state.repetitions['empty']}
                          name="repetitions"
@@ -997,11 +1000,10 @@ class PumpForm extends Component {
                          required/>
                 </div>
 
+                {/* Just here to ensure correct grid spacing */}
+                <div className="col-sm input-subform"></div>
 
-                <div className="col-sm-3 input-subform volume-subform"></div>
-
-
-                <div className="col-sm-3 input-subform flowrate-subform">
+                <div className="col-sm input-subform flowrate-subform">
                   <Input type="number"
                          value={this.state.flowRate['empty']}
                          pattern="\d+((\.)\d+)?"
@@ -1038,7 +1040,7 @@ class PumpForm extends Component {
             <FormGroup className="input-form">
               <div className="row">
 
-                <div className="col-sm-3 input-subform button-subform">
+                <div className="col-sm input-subform button-subform">
                   <Button color="success"
                           disabled={this.state.selectedPumps.length === 0}
                   > Bubble Cycle </Button>
@@ -1091,12 +1093,11 @@ class PumpForm extends Component {
                   </Modal>
                 </div>
 
+                {/* Just here to ensure correct grid spacing */}
+                <div className="col-sm input-subform"></div>
+                <div className="col-sm input-subform"></div>
 
-                <div className="col-sm-3 input-subform nrep-subform"></div>
-                <div className="col-sm-3 input-subform volume-subform"></div>
-
-
-                <div className="col-sm-3 input-subform flowrate-subform">
+                <div className="col-sm input-subform flowrate-subform">
                   <Input type="number"
                          value={this.state.flowRate['bubble']}
                          pattern="\d+((\.)\d+)?"
@@ -1133,7 +1134,7 @@ class PumpForm extends Component {
             <FormGroup className="input-form">
               <div className="row">
 
-                <div className="col-sm-3 input-subform button-subform">
+                <div className="col-sm input-subform button-subform">
                   <Button color="success"
                           disabled={this.state.selectedPumps.length === 0}
                   > Rinse Cycle </Button>
@@ -1156,7 +1157,7 @@ class PumpForm extends Component {
                 </div>
 
 
-                <div className="col-sm-3 input-subform nrep-subform">
+                <div className="col-sm input-subform nrep-subform">
                   <Input type="number"
                          value={this.state.repetitions['rinse']}
                          name="repetitions"
@@ -1167,11 +1168,10 @@ class PumpForm extends Component {
                          required/>
                 </div>
 
+                {/* Just here to ensure correct grid spacing */}
+                <div className="col-sm input-subform"></div>
 
-                <div className="col-sm-3 input-subform volume-subform"></div>
-
-
-                <div className="col-sm-3 input-subform flowrate-subform">
+                <div className="col-sm input-subform flowrate-subform">
                   <Input type="number"
                          value={this.state.flowRate['rinse']}
                          pattern="\d+((\.)\d+)?"
@@ -1207,18 +1207,17 @@ class PumpForm extends Component {
 
             <FormGroup className="input-form">
               <div className="row">
-                <div className="col-sm-3 input-subform button-subform">
+                <div className="col-sm input-subform button-subform">
                   <Button color="success"
                           disabled={this.state.selectedPumps.length === 0}
                   > Target Volume </Button>
                   <FormText>Set target volume of a syringe.</FormText>
                 </div>
 
+                {/* Just here to ensure correct grid spacing */}
+                <div className="col-sm input-subform"></div>
 
-                <div className="col-sm-3 input-subform nrep-subform"></div>
-
-
-                <div className="col-sm-3 input-subform volume-subform">
+                <div className="col-sm input-subform volume-subform">
                   <Input type="number"
                          value={this.state.targetVolume['targetVolume']}
                          pattern="\d+((\.)\d+)?"
@@ -1241,7 +1240,7 @@ class PumpForm extends Component {
                 </div>
 
 
-                <div className="col-sm-3 input-subform flowrate-subform">
+                <div className="col-sm input-subform flowrate-subform">
                   <Input type="number"
                          value={this.state.flowRate['targetVolume']}
                          pattern="\d+((\.)\d+)?"
