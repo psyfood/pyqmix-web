@@ -43,11 +43,12 @@ class FlowUnitInput extends Component {
         defaultValue={this.props.defaultValue}
         onChange={this.props.onChange}
         onBlur={this.props.onBlur}>
-      <option value="mL/s">mL/s</option>
-      <option value="mL/min">mL/min</option>
-      <option value="cL/s">cL/s</option>
-      <option value="cL/min">cL/min</option>
-    </Input>)
+        <option value="mL/s">mL/s</option>
+        <option value="mL/min">mL/min</option>
+        <option value="cL/s">cL/s</option>
+        <option value="cL/min">cL/min</option>
+      </Input>
+    )
   }
 }
 
