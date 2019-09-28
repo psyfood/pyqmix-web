@@ -739,7 +739,7 @@ class PumpForm extends Component {
         <div className="button-group">
 
           <Button
-            color="success"
+            color={this.state.webConnectedToPumps ? "danger" : "success"}
             onClick={this.handlePumpConfiguration}>
             {this.state.webConnectedToPumps ? "Stop and Disconnect Pumps" : "Detect Pumps"}
           </Button>
