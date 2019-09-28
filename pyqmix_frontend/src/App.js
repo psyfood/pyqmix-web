@@ -5,6 +5,21 @@ import { Button, ButtonGroup, FormGroup, Input, Modal,
 // import logo from './snake.svg';
 import './App.css';
 
+
+class RepetitionsInput extends Component {
+  render = () => {
+    return <Input type="number"
+                  value={this.props.value}
+                  name={this.props.name}
+                  onChange={this.props.onChange}
+                  onBlur={this.props.onBlur}
+                  min="1"
+                  placeholder="No. of repetitions."
+                  required/>
+  }
+}
+
+
 class PumpForm extends Component {
 
   // --- State --- //
@@ -912,17 +927,20 @@ class PumpForm extends Component {
                   </Modal>
                 </div>
 
-
                 <div className="col-sm input-subform nrep-subform">
-                  <Input type="number"
-                         className="foo"
-                         value={this.state.repetitions['fill']}
-                         name="repetitions"
-                         min="1"
-                         placeholder="No. of repetitions."
-                         onChange={(e) => this.handleStateChange('repetitions', 'fill', e.target.value)}
-                         onBlur={() => this.checkRepetitionInput()}
-                         required/>
+                  {/*<Input type="number"*/}
+                  {/*       value={this.state.repetitions['fill']}*/}
+                  {/*       name="repetitions"*/}
+                  {/*       min="1"*/}
+                  {/*       placeholder="No. of repetitions."*/}
+                  {/*       onChange={(e) => this.handleStateChange('repetitions', 'fill', e.target.value)}*/}
+                  {/*       onBlur={() => this.checkRepetitionInput()}*/}
+                  {/*       required/>*/}
+                   <RepetitionsInput
+                     value={this.state.repetitions['fill']}
+                     onChange={(e) => this.handleStateChange('repetitions', 'fill', e.target.value)}
+                     onBlur={() => this.checkRepetitionInput()}
+                   />
                 </div>
 
                 {/* Just here to ensure correct grid spacing */}
@@ -988,16 +1006,20 @@ class PumpForm extends Component {
                   </Modal>
                 </div>
 
-
                 <div className="col-sm input-subform nrep-subform">
-                  <Input type="number"
-                         value={this.state.repetitions['empty']}
-                         name="repetitions"
-                         min="1"
-                         placeholder="No. of repetitions."
-                         onChange={(e) => this.handleStateChange('repetitions', 'empty', e.target.value)}
-                         onBlur={() => this.checkRepetitionInput()}
-                         required/>
+                  {/*<Input type="number"*/}
+                  {/*       value={this.state.repetitions['empty']}*/}
+                  {/*       name="repetitions"*/}
+                  {/*       min="1"*/}
+                  {/*       placeholder="No. of repetitions."*/}
+                  {/*       onChange={(e) => this.handleStateChange('repetitions', 'empty', e.target.value)}*/}
+                  {/*       onBlur={() => this.checkRepetitionInput()}*/}
+                  {/*       required/>*/}
+                  <RepetitionsInput
+                    value={this.state.repetitions['empty']}
+                    onChange={(e) => this.handleStateChange('repetitions', 'empty', e.target.value)}
+                    onBlur={() => this.checkRepetitionInput()}
+                  />
                 </div>
 
                 {/* Just here to ensure correct grid spacing */}
@@ -1156,16 +1178,20 @@ class PumpForm extends Component {
                   </Modal>
                 </div>
 
-
                 <div className="col-sm input-subform nrep-subform">
-                  <Input type="number"
-                         value={this.state.repetitions['rinse']}
-                         name="repetitions"
-                         min="1"
-                         placeholder="No. of repetitions."
-                         onChange={(e) => this.handleStateChange('repetitions', 'rinse', e.target.value)}
-                         onBlur={() => this.checkRepetitionInput()}
-                         required/>
+                  {/*<Input type="number"*/}
+                  {/*       value={this.state.repetitions['rinse']}*/}
+                  {/*       name="repetitions"*/}
+                  {/*       min="1"*/}
+                  {/*       placeholder="No. of repetitions."*/}
+                  {/*       onChange={(e) => this.handleStateChange('repetitions', 'rinse', e.target.value)}*/}
+                  {/*       onBlur={() => this.checkRepetitionInput()}*/}
+                  {/*       required/>*/}
+                   <RepetitionsInput
+                     value={this.state.repetitions['rinse']}
+                     onChange={(e) => this.handleStateChange('repetitions', 'rinse', e.target.value)}
+                     onBlur={() => this.checkRepetitionInput()}
+                   />
                 </div>
 
                 {/* Just here to ensure correct grid spacing */}
