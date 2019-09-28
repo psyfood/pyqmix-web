@@ -19,7 +19,7 @@ Check out the `app.py` file in this repository.
 2. Browse to the `pyqmix_frontend` directory
 4. Type: `npm run build`
 
-This will create a `build`-folder in the current directory  
+This will create a `build`-folder in the current directory
 
 ## Create a specification file
 Specification files can be reused to generate executables so keep the file for the next build. 

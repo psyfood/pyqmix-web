@@ -6,6 +6,8 @@
   `bootstrap` to 4.3.1, and `reactstrap` to 8.0.1
 - Enable running pyqmix-web as an entry-point
 - Fix a minor (display) bug in the frontend
+- Improve developers' documentation.
+- Frontend now looks for all assets placed relative to "index.html"
 
 2019.1
 ------
