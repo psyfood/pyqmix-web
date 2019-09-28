@@ -35,6 +35,23 @@ class FlowRateInput extends Component {
 }
 
 
+class FlowUnitInput extends Component {
+  render = () => {
+    return (
+      <Input
+        type="select"
+        defaultValue={this.props.defaultValue}
+        onChange={this.props.onChange}
+        onBlur={this.props.onBlur}>
+      <option value="mL/s">mL/s</option>
+      <option value="mL/min">mL/min</option>
+      <option value="cL/s">cL/s</option>
+      <option value="cL/min">cL/min</option>
+    </Input>)
+  }
+}
+
+
 class PumpForm extends Component {
 
   // --- State --- //
@@ -979,16 +996,20 @@ class PumpForm extends Component {
                     onChange={(e) => this.handleStateChange('flowRate', 'fill', e.target.value)}
                     onBlur={() => this.checkFlowRateInput()}
                    />
-                  <Input type="select"
-                         name="flowUnit"
-                         defaultValue={this.state.flowUnit['fill']}
-                         onBlur={() => this.checkFlowRateInput()}
-                         onChange={(e) => this.handleStateChange('flowUnit', 'fill', e.target.value)}>
-                    <option value="mL/s">mL/s</option>
-                    <option value="mL/min">mL/min</option>
-                    <option value="cL/s">cL/s</option>
-                    <option value="cL/min">cL/min</option>
-                  </Input>
+                  {/*<Input type="select"*/}
+                  {/*       name="flowUnit"*/}
+                  {/*       defaultValue={this.state.flowUnit['fill']}*/}
+                  {/*       onBlur={() => this.checkFlowRateInput()}*/}
+                  {/*       onChange={(e) => this.handleStateChange('flowUnit', 'fill', e.target.value)}>*/}
+                  {/*  <option value="mL/s">mL/s</option>*/}
+                  {/*  <option value="mL/min">mL/min</option>*/}
+                  {/*  <option value="cL/s">cL/s</option>*/}
+                  {/*  <option value="cL/min">cL/min</option>*/}
+                  {/*</Input>*/}
+                  <FlowUnitInput defaultValue={this.state.flowUnit['fill']}
+                                 onChange={(e) => this.handleStateChange('flowUnit', 'fill', e.target.value)}
+                                 onBlur={() => this.checkFlowRateInput()}
+                  />
                 </div>
               </div>
             </FormGroup>
@@ -1064,16 +1085,20 @@ class PumpForm extends Component {
                      onChange={(e) => this.handleStateChange('flowRate', 'empty', e.target.value)}
                      onBlur={() => this.checkFlowRateInput()}
                    />
-                  <Input type="select"
-                         name="flowUnit"
-                         defaultValue={this.state.flowUnit['empty']}
-                         onBlur={() => this.checkFlowRateInput()}
-                         onChange={(e) => this.handleStateChange('flowUnit', 'empty', e.target.value)}>
-                    <option value="mL/s">mL/s</option>
-                    <option value="mL/min">mL/min</option>
-                    <option value="cL/s">cL/s</option>
-                    <option value="cL/min">cL/min</option>
-                  </Input>
+                  {/*<Input type="select"*/}
+                  {/*       name="flowUnit"*/}
+                  {/*       defaultValue={this.state.flowUnit['empty']}*/}
+                  {/*       onBlur={() => this.checkFlowRateInput()}*/}
+                  {/*       onChange={(e) => this.handleStateChange('flowUnit', 'empty', e.target.value)}>*/}
+                  {/*  <option value="mL/s">mL/s</option>*/}
+                  {/*  <option value="mL/min">mL/min</option>*/}
+                  {/*  <option value="cL/s">cL/s</option>*/}
+                  {/*  <option value="cL/min">cL/min</option>*/}
+                  {/*</Input>*/}
+                  <FlowUnitInput defaultValue={this.state.flowUnit['empty']}
+                                 onChange={(e) => this.handleStateChange('flowUnit', 'empty', e.target.value)}
+                                 onBlur={() => this.checkFlowRateInput()}
+                  />
                 </div>
               </div>
             </FormGroup>
@@ -1164,16 +1189,20 @@ class PumpForm extends Component {
                      onChange={(e) => this.handleStateChange('flowRate', 'bubble', e.target.value)}
                      onBlur={() => this.checkFlowRateInput()}
                    />
-                  <Input type="select"
-                         name="flowUnit"
-                         defaultValue={this.state.flowUnit['bubbleCycle']}
-                         onBlur={() => this.checkFlowRateInput()}
-                         onChange={(e) => this.handleStateChange('flowUnit', 'bubble', e.target.value)}>
-                    <option value="mL/s">mL/s</option>
-                    <option value="mL/min">mL/min</option>
-                    <option value="cL/s">cL/s</option>
-                    <option value="cL/min">cL/min</option>
-                  </Input>
+                  {/*<Input type="select"*/}
+                  {/*       name="flowUnit"*/}
+                  {/*       defaultValue={this.state.flowUnit['bubbleCycle']}*/}
+                  {/*       onBlur={() => this.checkFlowRateInput()}*/}
+                  {/*       onChange={(e) => this.handleStateChange('flowUnit', 'bubble', e.target.value)}>*/}
+                  {/*  <option value="mL/s">mL/s</option>*/}
+                  {/*  <option value="mL/min">mL/min</option>*/}
+                  {/*  <option value="cL/s">cL/s</option>*/}
+                  {/*  <option value="cL/min">cL/min</option>*/}
+                  {/*</Input>*/}
+                  <FlowUnitInput defaultValue={this.state.flowUnit['bubble']}
+                                 onChange={(e) => this.handleStateChange('flowUnit', 'bubble', e.target.value)}
+                                 onBlur={() => this.checkFlowRateInput()}
+                  />
                 </div>
               </div>
             </FormGroup>
@@ -1248,16 +1277,20 @@ class PumpForm extends Component {
                      onChange={(e) => this.handleStateChange('flowRate', 'rinse', e.target.value)}
                      onBlur={() => this.checkFlowRateInput()}
                    />
-                  <Input type="select"
-                         name="flowUnit"
-                         defaultValue={this.state.flowUnit['rinse']}
-                         onBlur={() => this.checkFlowRateInput()}
-                         onChange={(e) => this.handleStateChange('flowUnit', 'rinse', e.target.value)}>
-                    <option value="mL/s">mL/s</option>
-                    <option value="mL/min">mL/min</option>
-                    <option value="cL/s">cL/s</option>
-                    <option value="cL/min">cL/min</option>
-                  </Input>
+                  {/*<Input type="select"*/}
+                  {/*       name="flowUnit"*/}
+                  {/*       defaultValue={this.state.flowUnit['rinse']}*/}
+                  {/*       onBlur={() => this.checkFlowRateInput()}*/}
+                  {/*       onChange={(e) => this.handleStateChange('flowUnit', 'rinse', e.target.value)}>*/}
+                  {/*  <option value="mL/s">mL/s</option>*/}
+                  {/*  <option value="mL/min">mL/min</option>*/}
+                  {/*  <option value="cL/s">cL/s</option>*/}
+                  {/*  <option value="cL/min">cL/min</option>*/}
+                  {/*</Input>*/}
+                  <FlowUnitInput defaultValue={this.state.flowUnit['rinse']}
+                                 onChange={(e) => this.handleStateChange('flowUnit', 'rinse', e.target.value)}
+                                 onBlur={() => this.checkFlowRateInput()}
+                  />
                 </div>
               </div>
             </FormGroup>
@@ -1323,16 +1356,20 @@ class PumpForm extends Component {
                      onChange={(e) => this.handleStateChange('flowRate', 'targetVolume', e.target.value)}
                      onBlur={() => this.checkFlowRateInput()}
                    />
-                  <Input type="select"
-                         name="flowUnit"
-                         defaultValue={this.state.flowUnit['targetVolume']}
-                         onBlur={() => this.checkFlowRateInput()}
-                         onChange={(e) => this.handleStateChange('flowUnit', 'targetVolume', e.target.value)}>
-                    <option value="mL/s">mL/s</option>
-                    <option value="mL/min">mL/min</option>
-                    <option value="cL/s">cL/s</option>
-                    <option value="cL/min">cL/min</option>
-                  </Input>
+                  {/*<Input type="select"*/}
+                  {/*       name="flowUnit"*/}
+                  {/*       defaultValue={this.state.flowUnit['targetVolume']}*/}
+                  {/*       onBlur={() => this.checkFlowRateInput()}*/}
+                  {/*       onChange={(e) => this.handleStateChange('flowUnit', 'targetVolume', e.target.value)}>*/}
+                  {/*  <option value="mL/s">mL/s</option>*/}
+                  {/*  <option value="mL/min">mL/min</option>*/}
+                  {/*  <option value="cL/s">cL/s</option>*/}
+                  {/*  <option value="cL/min">cL/min</option>*/}
+                  {/*</Input>*/}
+                  <FlowUnitInput defaultValue={this.state.flowUnit['targetVolume']}
+                                 onChange={(e) => this.handleStateChange('flowUnit', 'targetVolume', e.target.value)}
+                                 onBlur={() => this.checkFlowRateInput()}
+                  />
                 </div>
               </div>
             </FormGroup>
