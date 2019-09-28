@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  margin-top: 80px;
 }
 
 .App-header {
@@ -8,6 +9,12 @@
   padding: 20px;
   color: white;
   min-width: 430px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  box-shadow: 0 0 10px #222;
 }
 
 .App-title {
