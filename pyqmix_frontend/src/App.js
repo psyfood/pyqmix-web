@@ -92,6 +92,24 @@ class VolumeUnitInput extends Component {
 }
 
 
+class PumpSelectionButtonGroup extends Component {
+  render = () => {
+    return (
+      <ButtonGroup>
+        {this.props.pumpIds.map(pumpId =>
+            <Button color={"primary"}
+                    key={pumpId}
+                    onClick={() => this.props.handlePumpSelection(pumpId)}
+                    active={this.props.selectedPumps.includes(pumpId)}>
+              {'Pump ' + pumpId.toString()}
+            </Button>)
+        }
+      </ButtonGroup>
+    )
+  }
+}
+
+
 class PumpForm extends Component {
 
   // --- State --- //
@@ -198,12 +216,12 @@ class PumpForm extends Component {
   };
 
   // --- Create list of detected pumps --- //
-  createListOfDetectedPumpIDs = () => {
+  createListOfDetectedPumpIds = () => {
     return this.state.pumps.map(p => p.pump_id)
   };
 
   // --- Update state.selectedPumps based on which pumps the user selected --- //
-  handleSelectedPumpList = (selected) => {
+  handlePumpSelection = (selected) => {
     const index = this.state.selectedPumps.indexOf(selected);
     if (index < 0) {
       this.state.selectedPumps.push(selected);
@@ -914,17 +932,10 @@ class PumpForm extends Component {
         </div>
 
         <div className="button-group">
-          <ButtonGroup>
-            {this.createListOfDetectedPumpIDs().map(pump_id =>
-              <Button color={"primary"}
-                      key={pump_id}
-                      onClick={() => this.handleSelectedPumpList(pump_id)}
-                      active={this.state.selectedPumps.includes(pump_id)}>
-                {'Pump ' + pump_id.toString()}
-              </Button>
-            )}
-          </ButtonGroup>
-          {/*<p>Selected: {JSON.stringify(this.state.selectedPumps)}</p>*/}
+          <PumpSelectionButtonGroup pumpIds={this.createListOfDetectedPumpIds()}
+                                    handlePumpSelection={this.handlePumpSelection}
+                                    selectedPumps={this.state.selectedPumps}
+          />
         </div>
 
         <div className="entire-input-form">
