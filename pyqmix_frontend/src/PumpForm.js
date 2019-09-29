@@ -844,7 +844,7 @@ class PumpForm extends Component {
 
         <div className="button-group">
           <PumpSelectionButtonGroup pumpIds={this.createListOfDetectedPumpIds()}
-                                    handlePumpSelection={this.handlePumpSelection}
+                                    onPumpSelection={this.handlePumpSelection}
                                     selectedPumps={this.state.selectedPumps}
           />
         </div>

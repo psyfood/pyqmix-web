@@ -9,7 +9,7 @@ class PumpSelectionButtonGroup extends Component {
         {this.props.pumpIds.map(pumpId =>
             <Button color={"primary"}
                     key={pumpId}
-                    onClick={() => this.props.handlePumpSelection(pumpId)}
+                    onClick={() => this.props.onPumpSelection(pumpId)}
                     active={this.props.selectedPumps.includes(pumpId)}>
               {'Pump ' + pumpId.toString()}
             </Button>)
