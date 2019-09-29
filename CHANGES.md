@@ -11,6 +11,7 @@
 - The frontend title is now fixed on top and hovering above all other
   content while scrolling
 - Refactor many parts of the pump form into separate React Components
+- Disable input fields until at least one pump is selected
 
 2019.1
 ------

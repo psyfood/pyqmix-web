@@ -14,6 +14,7 @@ class RepetitionsInput extends Component {
                   onBlur={this.props.onBlur}
                   min="1"
                   placeholder="No. of repetitions."
+                  disabled={this.props.disabled}
                   required />
   }
 }
@@ -30,6 +31,7 @@ class FlowRateInput extends Component {
                   min="0"
                   max={this.props.max}
                   placeholder="Flow rate."
+                  disabled={this.props.disabled}
                   required />
   }
 }
@@ -43,6 +45,7 @@ class FlowUnitInput extends Component {
         defaultValue={this.props.defaultValue}
         onChange={this.props.onChange}
         onBlur={this.props.onBlur}
+        disabled={this.props.disabled}
       >
         <option value="mL/s">mL/s</option>
         <option value="mL/min">mL/min</option>
@@ -65,6 +68,7 @@ class TargetVolumeInput extends Component {
                   min="0"
                   max={this.props.max}
                   placeholder="Target volume."
+                  disabled={this.props.disabled}
                   required />
   }
 }
@@ -78,6 +82,7 @@ class VolumeUnitInput extends Component {
         defaultValue={this.props.defaultValue}
         onChange={this.props.onChange}
         onBlur={this.props.onBlur}
+        disabled={this.props.disabled}
       >
         <option value="mL">mL</option>
         <option value="cL">cL</option>
@@ -999,6 +1004,7 @@ class PumpForm extends Component {
                      value={this.state.repetitions['fill']}
                      onChange={(e) => this.handleStateChange('repetitions', 'fill', e.target.value)}
                      onBlur={this.checkRepetitionInput}
+                     disabled={this.state.selectedPumps.length === 0}
                    />
                 </div>
 
@@ -1011,10 +1017,12 @@ class PumpForm extends Component {
                     max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('fill')}
                     onChange={(e) => this.handleStateChange('flowRate', 'fill', e.target.value)}
                     onBlur={this.checkFlowRateInput}
+                    disabled={this.state.selectedPumps.length === 0}
                    />
                   <FlowUnitInput defaultValue={this.state.flowUnit['fill']}
                                  onChange={(e) => this.handleStateChange('flowUnit', 'fill', e.target.value)}
                                  onBlur={this.checkFlowRateInput}
+                                 disabled={this.state.selectedPumps.length === 0}
                   />
                 </div>
               </div>
@@ -1059,6 +1067,7 @@ class PumpForm extends Component {
                     value={this.state.repetitions['empty']}
                     onChange={(e) => this.handleStateChange('repetitions', 'empty', e.target.value)}
                     onBlur={this.checkRepetitionInput}
+                    disabled={this.state.selectedPumps.length === 0}
                   />
                 </div>
 
@@ -1071,10 +1080,12 @@ class PumpForm extends Component {
                      max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('empty')}
                      onChange={(e) => this.handleStateChange('flowRate', 'empty', e.target.value)}
                      onBlur={this.checkFlowRateInput}
+                     disabled={this.state.selectedPumps.length === 0}
                    />
                   <FlowUnitInput defaultValue={this.state.flowUnit['empty']}
                                  onChange={(e) => this.handleStateChange('flowUnit', 'empty', e.target.value)}
                                  onBlur={this.checkFlowRateInput}
+                                 disabled={this.state.selectedPumps.length === 0}
                   />
                 </div>
               </div>
@@ -1154,10 +1165,12 @@ class PumpForm extends Component {
                      max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('bubble')}
                      onChange={(e) => this.handleStateChange('flowRate', 'bubble', e.target.value)}
                      onBlur={this.checkFlowRateInput}
+                     disabled={this.state.selectedPumps.length === 0}
                    />
                   <FlowUnitInput defaultValue={this.state.flowUnit['bubble']}
                                  onChange={(e) => this.handleStateChange('flowUnit', 'bubble', e.target.value)}
                                  onBlur={this.checkFlowRateInput}
+                                 disabled={this.state.selectedPumps.length === 0}
                   />
                 </div>
               </div>
@@ -1201,6 +1214,7 @@ class PumpForm extends Component {
                      value={this.state.repetitions['rinse']}
                      onChange={(e) => this.handleStateChange('repetitions', 'rinse', e.target.value)}
                      onBlur={this.checkRepetitionInput}
+                     disabled={this.state.selectedPumps.length === 0}
                    />
                 </div>
 
@@ -1213,10 +1227,12 @@ class PumpForm extends Component {
                      max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('rinse')}
                      onChange={(e) => this.handleStateChange('flowRate', 'rinse', e.target.value)}
                      onBlur={this.checkFlowRateInput}
+                     disabled={this.state.selectedPumps.length === 0}
                    />
                   <FlowUnitInput defaultValue={this.state.flowUnit['rinse']}
                                  onChange={(e) => this.handleStateChange('flowUnit', 'rinse', e.target.value)}
                                  onBlur={this.checkFlowRateInput}
+                                 disabled={this.state.selectedPumps.length === 0}
                   />
                 </div>
               </div>
@@ -1247,10 +1263,12 @@ class PumpForm extends Component {
                                      max={this.computeSmallestSyringeVolumeMilliLitres('targetVolume')}
                                      onChange={(e) => this.handleStateChange('targetVolume', 'targetVolume', e.target.value)}
                                      onBlur={this.checkTargetVolumeInput}
+                                     disabled={this.state.selectedPumps.length === 0}
                   />
                   <VolumeUnitInput defaultValue={this.state.volumeUnit['targetVolume']}
                                    onChange={(e) => this.handleStateChange('volumeUnit', 'targetVolume', e.target.value)}
                                    onBlur={this.checkTargetVolumeInput}
+                                   disabled={this.state.selectedPumps.length === 0}
                   />
                 </div>
 
@@ -1260,10 +1278,12 @@ class PumpForm extends Component {
                      max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('targetVolume')}
                      onChange={(e) => this.handleStateChange('flowRate', 'targetVolume', e.target.value)}
                      onBlur={this.checkFlowRateInput}
+                     disabled={this.state.selectedPumps.length === 0}
                    />
                   <FlowUnitInput defaultValue={this.state.flowUnit['targetVolume']}
                                  onChange={(e) => this.handleStateChange('flowUnit', 'targetVolume', e.target.value)}
                                  onBlur={this.checkFlowRateInput}
+                                 disabled={this.state.selectedPumps.length === 0}
                   />
                 </div>
               </div>
