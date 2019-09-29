@@ -10,6 +10,7 @@
 - Frontend now looks for all assets placed relative to "index.html"
 - The frontend title is now fixed on top and hovering above all other
   content while scrolling
+- Refactor many parts of the pump form into separate React Components
 
 2019.1
 ------
