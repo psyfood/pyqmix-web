@@ -20,16 +20,16 @@ class Outro extends Component {
       },
     });
 
-    var pyqmixVersion;
+    let pyqmixVersion;
     pyqmixVersion = response.ok ? await response.json() : "unknown";
     this.setState({pyqmixVersion: pyqmixVersion});
-
   };
 
   render = () => {
     return (
       <p>
-        pyqmix version {this.state.pyqmixVersion}
+        pyqmix version {this.state.pyqmixVersion}<br />
+        pyqmix-web © Camilla Arndal Andersen & Richard Höchenberger
       </p>
     )
   }

@@ -15,6 +15,7 @@
 - The "Disconnect" button is now displayed in a dangerous red
 - Backend test mode can now be enabled by setting the environment variable
   `PYQMIX_TEST_MODE`.
+- Display copyright notice in frontend
 
 2019.1
 ------
