@@ -1,6 +1,7 @@
 import React, {Component} from "react";
 import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownToggle, Form,
-         FormGroup, FormText, Modal, ModalBody, ModalFooter, ModalHeader
+         FormGroup, FormText, Modal, ModalBody, ModalFooter, ModalHeader,
+         Row, Col
 } from "reactstrap";
 import PumpSelectionButtonGroup from "./PumpSelectionButtonGroup";
 import {FlowRateInput, FlowUnitInput, RepetitionsInput} from "./CommonInputElements";
@@ -860,8 +861,9 @@ class PumpForm extends Component {
 
             <FormGroup className="input-form">
 
-              <div className="row">
-                <div className="col-sm input-subform button-subform">
+              <Row>
+                {/*<div className="col-sm input-subform button-subform">*/}
+                <Col sm className="input-subform button-subform">
                   <Button color="success"
                           disabled={this.state.selectedPumps.length === 0}
                   > Reference Move </Button>
@@ -878,13 +880,13 @@ class PumpForm extends Component {
                       <Button color="danger" onClick={() => this.toggle('referenceMove')}> Cancel </Button>
                     </ModalFooter>
                   </Modal>
-                </div>
+                </Col>
 
                 {/* Just here to ensure correct grid spacing */}
-                <div className="col-sm input-subform"></div>
-                <div className="col-sm input-subform"></div>
-                <div className="col-sm input-subform"></div>
-              </div>
+                <Col sm className="input-subform"></Col>
+                <Col sm className="input-subform"></Col>
+                <Col sm className="input-subform"></Col>
+              </Row>
             </FormGroup>
           </Form>
 
@@ -896,9 +898,9 @@ class PumpForm extends Component {
                 }}>
 
             <FormGroup className="input-form">
-              <div className="row">
+              <Row>
 
-                <div className="col-sm input-subform button-subform">
+                <Col className="input-subform button-subform">
                   <Button color="success"
                           disabled={this.state.selectedPumps.length === 0}
                   > Fill Cycle </Button>
@@ -920,21 +922,21 @@ class PumpForm extends Component {
                       </Button>
                     </ModalFooter>
                   </Modal>
-                </div>
+                </Col>
 
-                <div className="col-sm input-subform nrep-subform">
+                <Col sm className="input-subform nrep-subform">
                   <RepetitionsInput
                     value={this.state.repetitions['fill']}
                     onChange={(e) => this.handleStateChange('repetitions', 'fill', e.target.value)}
                     onBlur={this.checkRepetitionInput}
                     disabled={this.state.selectedPumps.length === 0}
                   />
-                </div>
+                </Col>
 
                 {/* Just here to ensure correct grid spacing */}
-                <div className="col-sm input-subform"></div>
+                <Col sm className="input-subform"></Col>
 
-                <div className="col-sm input-subform flowrate-subform">
+                <Col sm className="input-subform flowrate-subform">
                   <FlowRateInput
                     value={this.state.flowRate['fill']}
                     max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('fill')}
@@ -947,8 +949,8 @@ class PumpForm extends Component {
                                  onBlur={this.checkFlowRateInput}
                                  disabled={this.state.selectedPumps.length === 0}
                   />
-                </div>
-              </div>
+                </Col>
+              </Row>
             </FormGroup>
           </Form>
 
@@ -961,9 +963,9 @@ class PumpForm extends Component {
                 }}>
 
             <FormGroup className="input-form">
-              <div className="row">
+              <Row>
 
-                <div className="col-sm input-subform button-subform">
+                <Col sm className="input-subform button-subform">
                   <Button color="success"
                           disabled={this.state.selectedPumps.length === 0}
                   > Empty Cycle </Button>
@@ -983,21 +985,21 @@ class PumpForm extends Component {
                               onClick={() => this.toggle('empty')}> Cancel </Button>
                     </ModalFooter>
                   </Modal>
-                </div>
+                </Col>
 
-                <div className="col-sm input-subform nrep-subform">
+                <Col sm className="input-subform nrep-subform">
                   <RepetitionsInput
                     value={this.state.repetitions['empty']}
                     onChange={(e) => this.handleStateChange('repetitions', 'empty', e.target.value)}
                     onBlur={this.checkRepetitionInput}
                     disabled={this.state.selectedPumps.length === 0}
                   />
-                </div>
+                </Col>
 
                 {/* Just here to ensure correct grid spacing */}
-                <div className="col-sm input-subform"></div>
+                <Col sm className="input-subform"></Col>
 
-                <div className="col-sm input-subform flowrate-subform">
+                <Col sm className="input-subform flowrate-subform">
                   <FlowRateInput
                     value={this.state.flowRate['empty']}
                     max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('empty')}
@@ -1010,8 +1012,8 @@ class PumpForm extends Component {
                                  onBlur={this.checkFlowRateInput}
                                  disabled={this.state.selectedPumps.length === 0}
                   />
-                </div>
-              </div>
+                </Col>
+              </Row>
             </FormGroup>
           </Form>
 
@@ -1023,9 +1025,9 @@ class PumpForm extends Component {
                 }}>
 
             <FormGroup className="input-form">
-              <div className="row">
+              <Row>
 
-                <div className="col-sm input-subform button-subform">
+                <Col sm className="input-subform button-subform">
                   <Button color="success"
                           disabled={this.state.selectedPumps.length === 0}
                   > Bubble Cycle </Button>
@@ -1077,13 +1079,13 @@ class PumpForm extends Component {
                               onClick={() => this.handleBubbleCycleModal('cancel')}> Cancel </Button>
                     </ModalFooter>
                   </Modal>
-                </div>
+                </Col>
 
                 {/* Just here to ensure correct grid spacing */}
-                <div className="col-sm input-subform"></div>
-                <div className="col-sm input-subform"></div>
+                <Col sm className="input-subform"></Col>
+                <Col sm className="input-subform"></Col>
 
-                <div className="col-sm input-subform flowrate-subform">
+                <Col sm className="input-subform flowrate-subform">
                   <FlowRateInput
                     value={this.state.flowRate['bubble']}
                     max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('bubble')}
@@ -1096,8 +1098,8 @@ class PumpForm extends Component {
                                  onBlur={this.checkFlowRateInput}
                                  disabled={this.state.selectedPumps.length === 0}
                   />
-                </div>
-              </div>
+                </Col>
+              </Row>
             </FormGroup>
           </Form>
 
@@ -1109,9 +1111,9 @@ class PumpForm extends Component {
                 }}>
 
             <FormGroup className="input-form">
-              <div className="row">
+              <Row>
 
-                <div className="col-sm input-subform button-subform">
+                <Col sm className="input-subform button-subform">
                   <Button color="success"
                           disabled={this.state.selectedPumps.length === 0}
                   > Rinse Cycle </Button>
@@ -1131,21 +1133,21 @@ class PumpForm extends Component {
                       </Button>
                     </ModalFooter>
                   </Modal>
-                </div>
+                </Col>
 
-                <div className="col-sm input-subform nrep-subform">
+                <Col sm className="input-subform nrep-subform">
                   <RepetitionsInput
                     value={this.state.repetitions['rinse']}
                     onChange={(e) => this.handleStateChange('repetitions', 'rinse', e.target.value)}
                     onBlur={this.checkRepetitionInput}
                     disabled={this.state.selectedPumps.length === 0}
                   />
-                </div>
+                </Col>
 
                 {/* Just here to ensure correct grid spacing */}
-                <div className="col-sm input-subform"></div>
+                <Col sm className="input-subform"></Col>
 
-                <div className="col-sm input-subform flowrate-subform">
+                <Col sm className="input-subform flowrate-subform">
                   <FlowRateInput
                     value={this.state.flowRate['rinse']}
                     max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('rinse')}
@@ -1158,8 +1160,8 @@ class PumpForm extends Component {
                                  onBlur={this.checkFlowRateInput}
                                  disabled={this.state.selectedPumps.length === 0}
                   />
-                </div>
-              </div>
+                </Col>
+              </Row>
             </FormGroup>
           </Form>
 

@@ -1,4 +1,4 @@
-import {Button, Form, FormGroup, FormText} from "reactstrap";
+import {Button, Form, FormGroup, FormText, Col, Row} from "reactstrap";
 import {FlowRateInput, FlowUnitInput, TargetVolumeInput, VolumeUnitInput} from "./CommonInputElements";
 import React, {Component} from "react";
 
@@ -15,18 +15,18 @@ class TargetVolumeForm extends Component {
             onSubmit={this.handleSubmit}>
 
         <FormGroup className="input-form">
-          <div className="row">
-            <div className="col-sm input-subform button-subform">
+          <Row>
+            <Col sm className="input-subform button-subform">
               <Button color="success"
                       disabled={this.props.disabled}
               > Target Volume </Button>
               <FormText>Set target volume of a syringe.</FormText>
-            </div>
+            </Col>
 
             {/* Just here to ensure correct grid spacing */}
-            <div className="col-sm input-subform"></div>
+            <Col sm className="input-subform"></Col>
 
-            <div className="col-sm input-subform volume-subform">
+            <Col sm className="input-subform volume-subform">
               <TargetVolumeInput value={this.props.targetVolume}
                                  max={this.props.targetVolumeMax}
                                  onChange={this.props.onTargetVolumeChange}
@@ -38,9 +38,9 @@ class TargetVolumeForm extends Component {
                                onBlur={this.props.checkTargetVolumeInput}
                                disabled={this.props.disabled}
               />
-            </div>
+            </Col>
 
-            <div className="col-sm input-subform flowrate-subform">
+            <Col sm className="input-subform flowrate-subform">
               <FlowRateInput
                  value={this.props.flowRate}
                  max={this.props.flowRateMax}
@@ -53,8 +53,8 @@ class TargetVolumeForm extends Component {
                              onBlur={this.props.checkFlowRateInput}
                              disabled={this.props.disabled}
               />
-            </div>
-          </div>
+            </Col>
+          </Row>
         </FormGroup>
       </Form>
     )
