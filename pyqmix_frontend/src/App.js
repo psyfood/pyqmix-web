@@ -92,6 +92,64 @@ class VolumeUnitInput extends Component {
 }
 
 
+class TargetVolumeForm extends Component {
+  handleSubmit = (e) => {
+    e.preventDefault();
+    this.props.handlePumpOperation('targetVolume');
+  };
+
+  render = () => {
+    return (
+      <Form method="post"
+            onSubmit={this.handleSubmit}>
+
+        <FormGroup className="input-form">
+          <div className="row">
+            <div className="col-sm input-subform button-subform">
+              <Button color="success"
+                      disabled={this.props.disabled}
+              > Target Volume </Button>
+              <FormText>Set target volume of a syringe.</FormText>
+            </div>
+
+            {/* Just here to ensure correct grid spacing */}
+            <div className="col-sm input-subform"></div>
+
+            <div className="col-sm input-subform volume-subform">
+              <TargetVolumeInput value={this.props.targetVolume}
+                                 max={this.props.volumeMax}
+                                 onChange={this.props.onTargetVolumeChange}
+                                 onBlur={this.props.checkTargetVolumeInput}
+                                 disabled={this.props.disabled}
+              />
+              <VolumeUnitInput defaultValue={this.props.volumeUnit}
+                               onChange={this.props.onVolumeUnitChange}
+                               onBlur={this.props.checkTargetVolumeInput}
+                               disabled={this.props.disabled}
+              />
+            </div>
+
+            <div className="col-sm input-subform flowrate-subform">
+              <FlowRateInput
+                 value={this.props.flowRate}
+                 max={this.props.flowRateMax}
+                 onChange={this.props.onFlowRateChange}
+                 onBlur={this.props.checkFlowRateInput}
+                 disabled={this.props.disabled}
+              />
+              <FlowUnitInput defaultValue={this.props.flowUnit}
+                             onChange={this.props.onFlowUnitChange}
+                             onBlur={this.props.checkFlowRateInput}
+                             disabled={this.props.disabled}
+              />
+            </div>
+          </div>
+        </FormGroup>
+      </Form>
+    )
+  }
+}
+
 class PumpSelectionButtonGroup extends Component {
   render = () => {
     return (
@@ -303,7 +361,6 @@ class PumpForm extends Component {
   };
 
   checkTargetVolumeInput = () => {
-
     const activeSubform = this.state.activeSubform;
 
     if (this.computeSmallestSyringeVolumeMilliLitres() < this.computeVolumeMilliLitres(this.state)) {
@@ -1251,55 +1308,29 @@ class PumpForm extends Component {
           </Form>
 
           {/*TARGET VOLUME*/}
-          <Form method="post"
-                onSubmit={ (e) => {
-                  e.preventDefault();
-                  this.handlePumpOperation('targetVolume');
-                }}>
+          <TargetVolumeForm handlePumpOperation={this.handlePumpOperation}
+                            disabled={this.state.selectedPumps.length === 0}
 
-            <FormGroup className="input-form">
-              <div className="row">
-                <div className="col-sm input-subform button-subform">
-                  <Button color="success"
-                          disabled={this.state.selectedPumps.length === 0}
-                  > Target Volume </Button>
-                  <FormText>Set target volume of a syringe.</FormText>
-                </div>
+                            /* Target Volume */
+                            targetVolume={this.state.targetVolume['targetVolume']}
+                            volumeMax={this.computeSmallestSyringeVolumeMilliLitres('targetVolume')}
+                            onTargetVolumeChange={(e) => this.handleStateChange('targetVolume', 'targetVolume', e.target.value)}
+                            checkTargetVolumeInput={this.checkTargetVolumeInput}
 
-                {/* Just here to ensure correct grid spacing */}
-                <div className="col-sm input-subform"></div>
+                            /* Volume Unit */
+                            volumeUnit={this.state.volumeUnit['targetVolume']}
+                            onVolumeUnitChange={(e) => this.handleStateChange('volumeUnit', 'targetVolume', e.target.value)}
 
-                <div className="col-sm input-subform volume-subform">
-                  <TargetVolumeInput value={this.state.targetVolume['targetVolume']}
-                                     max={this.computeSmallestSyringeVolumeMilliLitres('targetVolume')}
-                                     onChange={(e) => this.handleStateChange('targetVolume', 'targetVolume', e.target.value)}
-                                     onBlur={this.checkTargetVolumeInput}
-                                     disabled={this.state.selectedPumps.length === 0}
-                  />
-                  <VolumeUnitInput defaultValue={this.state.volumeUnit['targetVolume']}
-                                   onChange={(e) => this.handleStateChange('volumeUnit', 'targetVolume', e.target.value)}
-                                   onBlur={this.checkTargetVolumeInput}
-                                   disabled={this.state.selectedPumps.length === 0}
-                  />
-                </div>
+                            /* Flow Rate */
+                            flowRate={this.state.flowRate['targetVolume']}
+                            flowRateMax={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('targetVolume')}
+                            onFlowRateChange={(e) => this.handleStateChange('flowRate', 'targetVolume', e.target.value)}
+                            checkFlowRateInput={this.checkFlowRateInput}
 
-                <div className="col-sm input-subform flowrate-subform">
-                  <FlowRateInput
-                     value={this.state.flowRate['targetVolume']}
-                     max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('targetVolume')}
-                     onChange={(e) => this.handleStateChange('flowRate', 'targetVolume', e.target.value)}
-                     onBlur={this.checkFlowRateInput}
-                     disabled={this.state.selectedPumps.length === 0}
-                   />
-                  <FlowUnitInput defaultValue={this.state.flowUnit['targetVolume']}
-                                 onChange={(e) => this.handleStateChange('flowUnit', 'targetVolume', e.target.value)}
-                                 onBlur={this.checkFlowRateInput}
-                                 disabled={this.state.selectedPumps.length === 0}
-                  />
-                </div>
-              </div>
-            </FormGroup>
-          </Form>
+                            /* Flow Unit */
+                            flowUnit={this.state.flowUnit['targetVolume']}
+                            onFlowUnitChange={(e) => this.handleStateChange('flowUnit', 'targetVolume', e.target.value)}
+          />
         </div>
       </div>
     )
