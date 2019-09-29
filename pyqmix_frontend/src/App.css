@@ -41,6 +41,10 @@ body {
   padding: 7px 0 7px 0;
 }
 
+.pump-form {
+  padding-top: 0.75em;
+}
+
 /* Web-page except buttons at the top */
 .entire-input-form {
     padding: 15px 10px 10px 10px;

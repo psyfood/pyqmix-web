@@ -5,6 +5,93 @@ import { Button, ButtonGroup, FormGroup, Input, Modal,
 // import logo from './snake.svg';
 import './App.css';
 
+
+class RepetitionsInput extends Component {
+  render = () => {
+    return <Input type="number"
+                  value={this.props.value}
+                  onChange={this.props.onChange}
+                  onBlur={this.props.onBlur}
+                  min="1"
+                  placeholder="No. of repetitions."
+                  disabled={this.props.disabled}
+                  required />
+  }
+}
+
+
+class FlowRateInput extends Component {
+  render = () => {
+    return <Input type="number"
+                  value={this.props.value}
+                  onChange={this.props.onChange}
+                  onBlur={this.props.onBlur}
+                  pattern="\d+((\.)\d+)?"
+                  step="any"
+                  min="0"
+                  max={this.props.max}
+                  placeholder="Flow rate."
+                  disabled={this.props.disabled}
+                  required />
+  }
+}
+
+
+class FlowUnitInput extends Component {
+  render = () => {
+    return (
+      <Input
+        type="select"
+        defaultValue={this.props.defaultValue}
+        onChange={this.props.onChange}
+        onBlur={this.props.onBlur}
+        disabled={this.props.disabled}
+      >
+        <option value="mL/s">mL/s</option>
+        <option value="mL/min">mL/min</option>
+        <option value="cL/s">cL/s</option>
+        <option value="cL/min">cL/min</option>
+      </Input>
+    )
+  }
+}
+
+
+class TargetVolumeInput extends Component {
+  render = () => {
+    return <Input type="number"
+                  value={this.props.value}
+                  onChange={this.props.onChange}
+                  onBlur={this.props.onBlur}
+                  pattern="\d+((\.)\d+)?"
+                  step="any"
+                  min="0"
+                  max={this.props.max}
+                  placeholder="Target volume."
+                  disabled={this.props.disabled}
+                  required />
+  }
+}
+
+
+class VolumeUnitInput extends Component {
+  render = () => {
+    return (
+      <Input
+        type="select"
+        defaultValue={this.props.defaultValue}
+        onChange={this.props.onChange}
+        onBlur={this.props.onBlur}
+        disabled={this.props.disabled}
+      >
+        <option value="mL">mL</option>
+        <option value="cL">cL</option>
+      </Input>
+    )
+  }
+}
+
+
 class PumpForm extends Component {
 
   // --- State --- //
@@ -724,7 +811,7 @@ class PumpForm extends Component {
         <div className="button-group">
 
           <Button
-            color="success"
+            color={this.state.webConnectedToPumps ? "danger" : "success"}
             onClick={this.handlePumpConfiguration}>
             {this.state.webConnectedToPumps ? "Stop and Disconnect Pumps" : "Detect Pumps"}
           </Button>
@@ -852,7 +939,7 @@ class PumpForm extends Component {
             <FormGroup className="input-form">
 
               <div className="row">
-                <div className="col-sm-3 input-subform button-subform">
+                <div className="col-sm input-subform button-subform">
                   <Button color="success"
                           disabled={this.state.selectedPumps.length === 0}
                   > Reference Move </Button>
@@ -869,9 +956,11 @@ class PumpForm extends Component {
                     </ModalFooter>
                   </Modal>
                 </div>
-                <div className="col-sm-3"></div>
-                <div className="col-sm-3"></div>
-                <div className="col-sm-3"></div>
+
+                {/* Just here to ensure correct grid spacing */}
+                <div className="col-sm input-subform"></div>
+                <div className="col-sm input-subform"></div>
+                <div className="col-sm input-subform"></div>
               </div>
             </FormGroup>
           </Form>
@@ -886,7 +975,7 @@ class PumpForm extends Component {
             <FormGroup className="input-form">
               <div className="row">
 
-                <div className="col-sm-3 input-subform button-subform">
+                <div className="col-sm input-subform button-subform">
                   <Button color="success"
                           disabled={this.state.selectedPumps.length === 0}
                   > Fill Cycle </Button>
@@ -910,43 +999,31 @@ class PumpForm extends Component {
                   </Modal>
                 </div>
 
-
-                <div className="col-sm-3 input-subform nrep-subform">
-                  <Input type="number"
-                         className="foo"
-                         value={this.state.repetitions['fill']}
-                         name="repetitions"
-                         min="1"
-                         placeholder="No. of repetitions."
-                         onChange={(e) => this.handleStateChange('repetitions', 'fill', e.target.value)}
-                         onBlur={() => this.checkRepetitionInput()}
-                         required/>
+                <div className="col-sm input-subform nrep-subform">
+                   <RepetitionsInput
+                     value={this.state.repetitions['fill']}
+                     onChange={(e) => this.handleStateChange('repetitions', 'fill', e.target.value)}
+                     onBlur={this.checkRepetitionInput}
+                     disabled={this.state.selectedPumps.length === 0}
+                   />
                 </div>
 
-                <div className="col-sm-3 input-subform volume-subform"></div>
+                {/* Just here to ensure correct grid spacing */}
+                <div className="col-sm input-subform"></div>
 
-                <div className="col-sm-3 input-subform flowrate-subform">
-                  <Input type="number"
-                         value={this.state.flowRate['fill']}
-                         pattern="\d+((\.)\d+)?"
-                         step="any"
-                         name="flowRate"
-                         min="0"
-                         max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('fill')}
-                         placeholder="Flow rate."
-                         onChange={(e) => this.handleStateChange('flowRate', 'fill', e.target.value)}
-                         onBlur={() => this.checkFlowRateInput()}
-                         required/>
-                  <Input type="select"
-                         name="flowUnit"
-                         defaultValue={this.state.flowUnit['fill']}
-                         onBlur={() => this.checkFlowRateInput()}
-                         onChange={(e) => this.handleStateChange('flowUnit', 'fill', e.target.value)}>
-                    <option value="mL/s">mL/s</option>
-                    <option value="mL/min">mL/min</option>
-                    <option value="cL/s">cL/s</option>
-                    <option value="cL/min">cL/min</option>
-                  </Input>
+                <div className="col-sm input-subform flowrate-subform">
+                  <FlowRateInput
+                    value={this.state.flowRate['fill']}
+                    max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('fill')}
+                    onChange={(e) => this.handleStateChange('flowRate', 'fill', e.target.value)}
+                    onBlur={this.checkFlowRateInput}
+                    disabled={this.state.selectedPumps.length === 0}
+                   />
+                  <FlowUnitInput defaultValue={this.state.flowUnit['fill']}
+                                 onChange={(e) => this.handleStateChange('flowUnit', 'fill', e.target.value)}
+                                 onBlur={this.checkFlowRateInput}
+                                 disabled={this.state.selectedPumps.length === 0}
+                  />
                 </div>
               </div>
             </FormGroup>
@@ -963,7 +1040,7 @@ class PumpForm extends Component {
             <FormGroup className="input-form">
               <div className="row">
 
-                <div className="col-sm-3 input-subform button-subform">
+                <div className="col-sm input-subform button-subform">
                   <Button color="success"
                           disabled={this.state.selectedPumps.length === 0}
                   > Empty Cycle </Button>
@@ -985,44 +1062,31 @@ class PumpForm extends Component {
                   </Modal>
                 </div>
 
-
-                <div className="col-sm-3 input-subform nrep-subform">
-                  <Input type="number"
-                         value={this.state.repetitions['empty']}
-                         name="repetitions"
-                         min="1"
-                         placeholder="No. of repetitions."
-                         onChange={(e) => this.handleStateChange('repetitions', 'empty', e.target.value)}
-                         onBlur={() => this.checkRepetitionInput()}
-                         required/>
+                <div className="col-sm input-subform nrep-subform">
+                  <RepetitionsInput
+                    value={this.state.repetitions['empty']}
+                    onChange={(e) => this.handleStateChange('repetitions', 'empty', e.target.value)}
+                    onBlur={this.checkRepetitionInput}
+                    disabled={this.state.selectedPumps.length === 0}
+                  />
                 </div>
 
+                {/* Just here to ensure correct grid spacing */}
+                <div className="col-sm input-subform"></div>
 
-                <div className="col-sm-3 input-subform volume-subform"></div>
-
-
-                <div className="col-sm-3 input-subform flowrate-subform">
-                  <Input type="number"
-                         value={this.state.flowRate['empty']}
-                         pattern="\d+((\.)\d+)?"
-                         step="any"
-                         name="flowRate"
-                         min="0"
-                         max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('empty')}
-                         placeholder="Flow rate."
-                         onChange={(e) => this.handleStateChange('flowRate', 'empty', e.target.value)}
-                         onBlur={() => this.checkFlowRateInput()}
-                         required/>
-                  <Input type="select"
-                         name="flowUnit"
-                         defaultValue={this.state.flowUnit['empty']}
-                         onBlur={() => this.checkFlowRateInput()}
-                         onChange={(e) => this.handleStateChange('flowUnit', 'empty', e.target.value)}>
-                    <option value="mL/s">mL/s</option>
-                    <option value="mL/min">mL/min</option>
-                    <option value="cL/s">cL/s</option>
-                    <option value="cL/min">cL/min</option>
-                  </Input>
+                <div className="col-sm input-subform flowrate-subform">
+                   <FlowRateInput
+                     value={this.state.flowRate['empty']}
+                     max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('empty')}
+                     onChange={(e) => this.handleStateChange('flowRate', 'empty', e.target.value)}
+                     onBlur={this.checkFlowRateInput}
+                     disabled={this.state.selectedPumps.length === 0}
+                   />
+                  <FlowUnitInput defaultValue={this.state.flowUnit['empty']}
+                                 onChange={(e) => this.handleStateChange('flowUnit', 'empty', e.target.value)}
+                                 onBlur={this.checkFlowRateInput}
+                                 disabled={this.state.selectedPumps.length === 0}
+                  />
                 </div>
               </div>
             </FormGroup>
@@ -1038,7 +1102,7 @@ class PumpForm extends Component {
             <FormGroup className="input-form">
               <div className="row">
 
-                <div className="col-sm-3 input-subform button-subform">
+                <div className="col-sm input-subform button-subform">
                   <Button color="success"
                           disabled={this.state.selectedPumps.length === 0}
                   > Bubble Cycle </Button>
@@ -1091,33 +1155,23 @@ class PumpForm extends Component {
                   </Modal>
                 </div>
 
+                {/* Just here to ensure correct grid spacing */}
+                <div className="col-sm input-subform"></div>
+                <div className="col-sm input-subform"></div>
 
-                <div className="col-sm-3 input-subform nrep-subform"></div>
-                <div className="col-sm-3 input-subform volume-subform"></div>
-
-
-                <div className="col-sm-3 input-subform flowrate-subform">
-                  <Input type="number"
-                         value={this.state.flowRate['bubble']}
-                         pattern="\d+((\.)\d+)?"
-                         step="any"
-                         name="flowRate"
-                         min="0"
-                         max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('bubble')}
-                         placeholder="Flow rate."
-                         onChange={(e) => this.handleStateChange('flowRate', 'bubble', e.target.value)}
-                         onBlur={() => this.checkFlowRateInput()}
-                         required/>
-                  <Input type="select"
-                         name="flowUnit"
-                         defaultValue={this.state.flowUnit['bubbleCycle']}
-                         onBlur={() => this.checkFlowRateInput()}
-                         onChange={(e) => this.handleStateChange('flowUnit', 'bubble', e.target.value)}>
-                    <option value="mL/s">mL/s</option>
-                    <option value="mL/min">mL/min</option>
-                    <option value="cL/s">cL/s</option>
-                    <option value="cL/min">cL/min</option>
-                  </Input>
+                <div className="col-sm input-subform flowrate-subform">
+                  <FlowRateInput
+                     value={this.state.flowRate['bubble']}
+                     max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('bubble')}
+                     onChange={(e) => this.handleStateChange('flowRate', 'bubble', e.target.value)}
+                     onBlur={this.checkFlowRateInput}
+                     disabled={this.state.selectedPumps.length === 0}
+                   />
+                  <FlowUnitInput defaultValue={this.state.flowUnit['bubble']}
+                                 onChange={(e) => this.handleStateChange('flowUnit', 'bubble', e.target.value)}
+                                 onBlur={this.checkFlowRateInput}
+                                 disabled={this.state.selectedPumps.length === 0}
+                  />
                 </div>
               </div>
             </FormGroup>
@@ -1133,7 +1187,7 @@ class PumpForm extends Component {
             <FormGroup className="input-form">
               <div className="row">
 
-                <div className="col-sm-3 input-subform button-subform">
+                <div className="col-sm input-subform button-subform">
                   <Button color="success"
                           disabled={this.state.selectedPumps.length === 0}
                   > Rinse Cycle </Button>
@@ -1155,44 +1209,31 @@ class PumpForm extends Component {
                   </Modal>
                 </div>
 
-
-                <div className="col-sm-3 input-subform nrep-subform">
-                  <Input type="number"
-                         value={this.state.repetitions['rinse']}
-                         name="repetitions"
-                         min="1"
-                         placeholder="No. of repetitions."
-                         onChange={(e) => this.handleStateChange('repetitions', 'rinse', e.target.value)}
-                         onBlur={() => this.checkRepetitionInput()}
-                         required/>
+                <div className="col-sm input-subform nrep-subform">
+                   <RepetitionsInput
+                     value={this.state.repetitions['rinse']}
+                     onChange={(e) => this.handleStateChange('repetitions', 'rinse', e.target.value)}
+                     onBlur={this.checkRepetitionInput}
+                     disabled={this.state.selectedPumps.length === 0}
+                   />
                 </div>
 
+                {/* Just here to ensure correct grid spacing */}
+                <div className="col-sm input-subform"></div>
 
-                <div className="col-sm-3 input-subform volume-subform"></div>
-
-
-                <div className="col-sm-3 input-subform flowrate-subform">
-                  <Input type="number"
-                         value={this.state.flowRate['rinse']}
-                         pattern="\d+((\.)\d+)?"
-                         step="any"
-                         name="flowRate"
-                         min="0"
-                         max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('rinse')}
-                         placeholder="Flow rate."
-                         onBlur={() => this.checkFlowRateInput()}
-                         onChange={(e) => this.handleStateChange('flowRate', 'rinse', e.target.value)}
-                         required/>
-                  <Input type="select"
-                         name="flowUnit"
-                         defaultValue={this.state.flowUnit['rinse']}
-                         onBlur={() => this.checkFlowRateInput()}
-                         onChange={(e) => this.handleStateChange('flowUnit', 'rinse', e.target.value)}>
-                    <option value="mL/s">mL/s</option>
-                    <option value="mL/min">mL/min</option>
-                    <option value="cL/s">cL/s</option>
-                    <option value="cL/min">cL/min</option>
-                  </Input>
+                <div className="col-sm input-subform flowrate-subform">
+                   <FlowRateInput
+                     value={this.state.flowRate['rinse']}
+                     max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('rinse')}
+                     onChange={(e) => this.handleStateChange('flowRate', 'rinse', e.target.value)}
+                     onBlur={this.checkFlowRateInput}
+                     disabled={this.state.selectedPumps.length === 0}
+                   />
+                  <FlowUnitInput defaultValue={this.state.flowUnit['rinse']}
+                                 onChange={(e) => this.handleStateChange('flowUnit', 'rinse', e.target.value)}
+                                 onBlur={this.checkFlowRateInput}
+                                 disabled={this.state.selectedPumps.length === 0}
+                  />
                 </div>
               </div>
             </FormGroup>
@@ -1207,62 +1248,43 @@ class PumpForm extends Component {
 
             <FormGroup className="input-form">
               <div className="row">
-                <div className="col-sm-3 input-subform button-subform">
+                <div className="col-sm input-subform button-subform">
                   <Button color="success"
                           disabled={this.state.selectedPumps.length === 0}
                   > Target Volume </Button>
                   <FormText>Set target volume of a syringe.</FormText>
                 </div>
 
+                {/* Just here to ensure correct grid spacing */}
+                <div className="col-sm input-subform"></div>
 
-                <div className="col-sm-3 input-subform nrep-subform"></div>
-
-
-                <div className="col-sm-3 input-subform volume-subform">
-                  <Input type="number"
-                         value={this.state.targetVolume['targetVolume']}
-                         pattern="\d+((\.)\d+)?"
-                         step="any"
-                         name="targetVolume"
-                         min="0"
-                         max={this.computeSmallestSyringeVolumeMilliLitres('targetVolume')}
-                         placeholder="Target volume."
-                         onChange={(e) => this.handleStateChange('targetVolume', 'targetVolume', e.target.value)}
-                         onBlur={() => this.checkTargetVolumeInput()}
-                         required/>
-                  <Input type="select"
-                         name="flowUnit"
-                         defaultValue={this.state.volumeUnit['targetVolume']}
-                         onBlur={() => this.checkTargetVolumeInput()}
-                         onChange={(e) => this.handleStateChange('volumeUnit', 'targetVolume', e.target.value)}>
-                    <option value="mL">mL</option>
-                    <option value="cL">cL</option>
-                  </Input>
+                <div className="col-sm input-subform volume-subform">
+                  <TargetVolumeInput value={this.state.targetVolume['targetVolume']}
+                                     max={this.computeSmallestSyringeVolumeMilliLitres('targetVolume')}
+                                     onChange={(e) => this.handleStateChange('targetVolume', 'targetVolume', e.target.value)}
+                                     onBlur={this.checkTargetVolumeInput}
+                                     disabled={this.state.selectedPumps.length === 0}
+                  />
+                  <VolumeUnitInput defaultValue={this.state.volumeUnit['targetVolume']}
+                                   onChange={(e) => this.handleStateChange('volumeUnit', 'targetVolume', e.target.value)}
+                                   onBlur={this.checkTargetVolumeInput}
+                                   disabled={this.state.selectedPumps.length === 0}
+                  />
                 </div>
 
-
-                <div className="col-sm-3 input-subform flowrate-subform">
-                  <Input type="number"
-                         value={this.state.flowRate['targetVolume']}
-                         pattern="\d+((\.)\d+)?"
-                         step="any"
-                         name="flowRate"
-                         min="0"
-                         max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('targetVolume')}
-                         placeholder="Flow rate."
-                         onChange={(e) => this.handleStateChange('flowRate', 'targetVolume', e.target.value)}
-                         onBlur={() => this.checkFlowRateInput()}
-                         required/>
-                  <Input type="select"
-                         name="flowUnit"
-                         defaultValue={this.state.flowUnit['targetVolume']}
-                         onBlur={() => this.checkFlowRateInput()}
-                         onChange={(e) => this.handleStateChange('flowUnit', 'targetVolume', e.target.value)}>
-                    <option value="mL/s">mL/s</option>
-                    <option value="mL/min">mL/min</option>
-                    <option value="cL/s">cL/s</option>
-                    <option value="cL/min">cL/min</option>
-                  </Input>
+                <div className="col-sm input-subform flowrate-subform">
+                  <FlowRateInput
+                     value={this.state.flowRate['targetVolume']}
+                     max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('targetVolume')}
+                     onChange={(e) => this.handleStateChange('flowRate', 'targetVolume', e.target.value)}
+                     onBlur={this.checkFlowRateInput}
+                     disabled={this.state.selectedPumps.length === 0}
+                   />
+                  <FlowUnitInput defaultValue={this.state.flowUnit['targetVolume']}
+                                 onChange={(e) => this.handleStateChange('flowUnit', 'targetVolume', e.target.value)}
+                                 onBlur={this.checkFlowRateInput}
+                                 disabled={this.state.selectedPumps.length === 0}
+                  />
                 </div>
               </div>
             </FormGroup>
