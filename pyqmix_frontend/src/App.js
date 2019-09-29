@@ -53,6 +53,39 @@ class FlowUnitInput extends Component {
 }
 
 
+class TargetVolumeInput extends Component {
+  render = () => {
+    return <Input type="number"
+                  value={this.props.value}
+                  onChange={this.props.onChange}
+                  onBlur={this.props.onBlur}
+                  pattern="\d+((\.)\d+)?"
+                  step="any"
+                  min="0"
+                  max={this.props.max}
+                  placeholder="Target volume."
+                  required />
+  }
+}
+
+
+class VolumeUnitInput extends Component {
+  render = () => {
+    return (
+      <Input
+        type="select"
+        defaultValue={this.props.defaultValue}
+        onChange={this.props.onChange}
+        onBlur={this.props.onBlur}
+      >
+        <option value="mL">mL</option>
+        <option value="cL">cL</option>
+      </Input>
+    )
+  }
+}
+
+
 class PumpForm extends Component {
 
   // --- State --- //
@@ -1317,25 +1350,34 @@ class PumpForm extends Component {
                 <div className="col-sm input-subform"></div>
 
                 <div className="col-sm input-subform volume-subform">
-                  <Input type="number"
-                         value={this.state.targetVolume['targetVolume']}
-                         pattern="\d+((\.)\d+)?"
-                         step="any"
-                         name="targetVolume"
-                         min="0"
-                         max={this.computeSmallestSyringeVolumeMilliLitres('targetVolume')}
-                         placeholder="Target volume."
-                         onChange={(e) => this.handleStateChange('targetVolume', 'targetVolume', e.target.value)}
-                         onBlur={() => this.checkTargetVolumeInput()}
-                         required/>
-                  <Input type="select"
-                         name="flowUnit"
-                         defaultValue={this.state.volumeUnit['targetVolume']}
-                         onBlur={() => this.checkTargetVolumeInput()}
-                         onChange={(e) => this.handleStateChange('volumeUnit', 'targetVolume', e.target.value)}>
-                    <option value="mL">mL</option>
-                    <option value="cL">cL</option>
-                  </Input>
+                  {/*<Input type="number"*/}
+                  {/*       value={this.state.targetVolume['targetVolume']}*/}
+                  {/*       pattern="\d+((\.)\d+)?"*/}
+                  {/*       step="any"*/}
+                  {/*       name="targetVolume"*/}
+                  {/*       min="0"*/}
+                  {/*       max={this.computeSmallestSyringeVolumeMilliLitres('targetVolume')}*/}
+                  {/*       placeholder="Target volume."*/}
+                  {/*       onChange={(e) => this.handleStateChange('targetVolume', 'targetVolume', e.target.value)}*/}
+                  {/*       onBlur={() => this.checkTargetVolumeInput()}*/}
+                  {/*       required/>*/}
+                  <TargetVolumeInput value={this.state.targetVolume['targetVolume']}
+                                     max={this.computeSmallestSyringeVolumeMilliLitres('targetVolume')}
+                                     onChange={(e) => this.handleStateChange('targetVolume', 'targetVolume', e.target.value)}
+                                     onBlur={() => this.checkTargetVolumeInput()}
+                  />
+                  {/*<Input type="select"*/}
+                  {/*       name="flowUnit"*/}
+                  {/*       defaultValue={this.state.volumeUnit['targetVolume']}*/}
+                  {/*       onBlur={() => this.checkTargetVolumeInput()}*/}
+                  {/*       onChange={(e) => this.handleStateChange('volumeUnit', 'targetVolume', e.target.value)}>*/}
+                  {/*  <option value="mL">mL</option>*/}
+                  {/*  <option value="cL">cL</option>*/}
+                  {/*</Input>*/}
+                  <VolumeUnitInput defaultValue={this.state.volumeUnit['targetVolume']}
+                                   onChange={(e) => this.handleStateChange('volumeUnit', 'targetVolume', e.target.value)}
+                                   onBlur={() => this.checkTargetVolumeInput()}
+                  />
                 </div>
 
 
