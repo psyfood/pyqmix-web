@@ -12,6 +12,7 @@
   content while scrolling
 - Refactor many parts of the pump form into separate React Components
 - Disable input fields until at least one pump is selected
+- The "Disconnect" button is now displayed in a dangerous red
 
 2019.1
 ------
