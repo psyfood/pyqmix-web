@@ -4,6 +4,7 @@ from flask_restplus.fields import Float, Boolean, String, Nested
 from pyqmix import QmixBus, config, QmixPump
 from pyqmix.pump import syringes
 import pyqmix
+import os
 import os.path as op
 import sys
 from collections import OrderedDict
@@ -43,8 +44,14 @@ config.delete_config()
 
 ## --- Choose session type --- ##
 app.config.from_object(__name__)
-app.config['test_session'] = False
 app.secret_key = 'secret_key'
+
+if os.environ.get('PYQMIX_TEST_MODE') in [1, 'True']:
+    app.config.update(test_session=True)
+    print('Enabling test mode.')
+else:
+    app.config.update(test_session=False)
+
 
 ## --- Flask-RESTPlus models --- ##
 config_setup = api.model('config setup' , {

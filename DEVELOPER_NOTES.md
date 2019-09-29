@@ -32,3 +32,10 @@ Then, from the `pyqmix_frontend` directory, simply invoke
 serve build/
 ```
 and you're ready to view the app in the browser.
+
+
+## Backend: Run without pumps
+
+It's possible to bring up the Flask backend even when no pump system is
+connected to the computer. To do so, set the environment variable
+`PYQMIX_TEST_MODE` to `1` or `True` before starting Flask.
