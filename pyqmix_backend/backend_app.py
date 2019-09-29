@@ -46,7 +46,7 @@ config.delete_config()
 app.config.from_object(__name__)
 app.secret_key = 'secret_key'
 
-if os.environ.get('PYQMIX_TEST_MODE') in [1, 'True']:
+if os.environ.get('PYQMIX_TEST_MODE') in ['1', 'True']:
     app.config.update(test_session=True)
     print('Enabling test mode.')
 else:
