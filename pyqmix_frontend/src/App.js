@@ -995,14 +995,6 @@ class PumpForm extends Component {
                 </div>
 
                 <div className="col-sm input-subform nrep-subform">
-                  {/*<Input type="number"*/}
-                  {/*       value={this.state.repetitions['fill']}*/}
-                  {/*       name="repetitions"*/}
-                  {/*       min="1"*/}
-                  {/*       placeholder="No. of repetitions."*/}
-                  {/*       onChange={(e) => this.handleStateChange('repetitions', 'fill', e.target.value)}*/}
-                  {/*       onBlur={() => this.checkRepetitionInput()}*/}
-                  {/*       required/>*/}
                    <RepetitionsInput
                      value={this.state.repetitions['fill']}
                      onChange={(e) => this.handleStateChange('repetitions', 'fill', e.target.value)}
@@ -1014,33 +1006,12 @@ class PumpForm extends Component {
                 <div className="col-sm input-subform"></div>
 
                 <div className="col-sm input-subform flowrate-subform">
-                  {/*<Input type="number"*/}
-                  {/*       value={this.state.flowRate['fill']}*/}
-                  {/*       pattern="\d+((\.)\d+)?"*/}
-                  {/*       step="any"*/}
-                  {/*       name="flowRate"*/}
-                  {/*       min="0"*/}
-                  {/*       max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('fill')}*/}
-                  {/*       placeholder="Flow rate."*/}
-                  {/*       onChange={(e) => this.handleStateChange('flowRate', 'fill', e.target.value)}*/}
-                  {/*       onBlur={() => this.checkFlowRateInput()}*/}
-                  {/*       required/>*/}
                   <FlowRateInput
                     value={this.state.flowRate['fill']}
                     max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('fill')}
                     onChange={(e) => this.handleStateChange('flowRate', 'fill', e.target.value)}
                     onBlur={() => this.checkFlowRateInput()}
                    />
-                  {/*<Input type="select"*/}
-                  {/*       name="flowUnit"*/}
-                  {/*       defaultValue={this.state.flowUnit['fill']}*/}
-                  {/*       onBlur={() => this.checkFlowRateInput()}*/}
-                  {/*       onChange={(e) => this.handleStateChange('flowUnit', 'fill', e.target.value)}>*/}
-                  {/*  <option value="mL/s">mL/s</option>*/}
-                  {/*  <option value="mL/min">mL/min</option>*/}
-                  {/*  <option value="cL/s">cL/s</option>*/}
-                  {/*  <option value="cL/min">cL/min</option>*/}
-                  {/*</Input>*/}
                   <FlowUnitInput defaultValue={this.state.flowUnit['fill']}
                                  onChange={(e) => this.handleStateChange('flowUnit', 'fill', e.target.value)}
                                  onBlur={() => this.checkFlowRateInput()}
@@ -1084,14 +1055,6 @@ class PumpForm extends Component {
                 </div>
 
                 <div className="col-sm input-subform nrep-subform">
-                  {/*<Input type="number"*/}
-                  {/*       value={this.state.repetitions['empty']}*/}
-                  {/*       name="repetitions"*/}
-                  {/*       min="1"*/}
-                  {/*       placeholder="No. of repetitions."*/}
-                  {/*       onChange={(e) => this.handleStateChange('repetitions', 'empty', e.target.value)}*/}
-                  {/*       onBlur={() => this.checkRepetitionInput()}*/}
-                  {/*       required/>*/}
                   <RepetitionsInput
                     value={this.state.repetitions['empty']}
                     onChange={(e) => this.handleStateChange('repetitions', 'empty', e.target.value)}
@@ -1103,33 +1066,12 @@ class PumpForm extends Component {
                 <div className="col-sm input-subform"></div>
 
                 <div className="col-sm input-subform flowrate-subform">
-                  {/*<Input type="number"*/}
-                  {/*       value={this.state.flowRate['empty']}*/}
-                  {/*       pattern="\d+((\.)\d+)?"*/}
-                  {/*       step="any"*/}
-                  {/*       name="flowRate"*/}
-                  {/*       min="0"*/}
-                  {/*       max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('empty')}*/}
-                  {/*       placeholder="Flow rate."*/}
-                  {/*       onChange={(e) => this.handleStateChange('flowRate', 'empty', e.target.value)}*/}
-                  {/*       onBlur={() => this.checkFlowRateInput()}*/}
-                  {/*       required/>*/}
                    <FlowRateInput
                      value={this.state.flowRate['empty']}
                      max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('empty')}
                      onChange={(e) => this.handleStateChange('flowRate', 'empty', e.target.value)}
                      onBlur={() => this.checkFlowRateInput()}
                    />
-                  {/*<Input type="select"*/}
-                  {/*       name="flowUnit"*/}
-                  {/*       defaultValue={this.state.flowUnit['empty']}*/}
-                  {/*       onBlur={() => this.checkFlowRateInput()}*/}
-                  {/*       onChange={(e) => this.handleStateChange('flowUnit', 'empty', e.target.value)}>*/}
-                  {/*  <option value="mL/s">mL/s</option>*/}
-                  {/*  <option value="mL/min">mL/min</option>*/}
-                  {/*  <option value="cL/s">cL/s</option>*/}
-                  {/*  <option value="cL/min">cL/min</option>*/}
-                  {/*</Input>*/}
                   <FlowUnitInput defaultValue={this.state.flowUnit['empty']}
                                  onChange={(e) => this.handleStateChange('flowUnit', 'empty', e.target.value)}
                                  onBlur={() => this.checkFlowRateInput()}
@@ -1207,33 +1149,12 @@ class PumpForm extends Component {
                 <div className="col-sm input-subform"></div>
 
                 <div className="col-sm input-subform flowrate-subform">
-                  {/*<Input type="number"*/}
-                  {/*       value={this.state.flowRate['bubble']}*/}
-                  {/*       pattern="\d+((\.)\d+)?"*/}
-                  {/*       step="any"*/}
-                  {/*       name="flowRate"*/}
-                  {/*       min="0"*/}
-                  {/*       max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('bubble')}*/}
-                  {/*       placeholder="Flow rate."*/}
-                  {/*       onChange={(e) => this.handleStateChange('flowRate', 'bubble', e.target.value)}*/}
-                  {/*       onBlur={() => this.checkFlowRateInput()}*/}
-                  {/*       required/>*/}
                   <FlowRateInput
                      value={this.state.flowRate['bubble']}
                      max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('bubble')}
                      onChange={(e) => this.handleStateChange('flowRate', 'bubble', e.target.value)}
                      onBlur={() => this.checkFlowRateInput()}
                    />
-                  {/*<Input type="select"*/}
-                  {/*       name="flowUnit"*/}
-                  {/*       defaultValue={this.state.flowUnit['bubbleCycle']}*/}
-                  {/*       onBlur={() => this.checkFlowRateInput()}*/}
-                  {/*       onChange={(e) => this.handleStateChange('flowUnit', 'bubble', e.target.value)}>*/}
-                  {/*  <option value="mL/s">mL/s</option>*/}
-                  {/*  <option value="mL/min">mL/min</option>*/}
-                  {/*  <option value="cL/s">cL/s</option>*/}
-                  {/*  <option value="cL/min">cL/min</option>*/}
-                  {/*</Input>*/}
                   <FlowUnitInput defaultValue={this.state.flowUnit['bubble']}
                                  onChange={(e) => this.handleStateChange('flowUnit', 'bubble', e.target.value)}
                                  onBlur={() => this.checkFlowRateInput()}
@@ -1276,14 +1197,6 @@ class PumpForm extends Component {
                 </div>
 
                 <div className="col-sm input-subform nrep-subform">
-                  {/*<Input type="number"*/}
-                  {/*       value={this.state.repetitions['rinse']}*/}
-                  {/*       name="repetitions"*/}
-                  {/*       min="1"*/}
-                  {/*       placeholder="No. of repetitions."*/}
-                  {/*       onChange={(e) => this.handleStateChange('repetitions', 'rinse', e.target.value)}*/}
-                  {/*       onBlur={() => this.checkRepetitionInput()}*/}
-                  {/*       required/>*/}
                    <RepetitionsInput
                      value={this.state.repetitions['rinse']}
                      onChange={(e) => this.handleStateChange('repetitions', 'rinse', e.target.value)}
@@ -1295,33 +1208,12 @@ class PumpForm extends Component {
                 <div className="col-sm input-subform"></div>
 
                 <div className="col-sm input-subform flowrate-subform">
-                  {/*<Input type="number"*/}
-                  {/*       value={this.state.flowRate['rinse']}*/}
-                  {/*       pattern="\d+((\.)\d+)?"*/}
-                  {/*       step="any"*/}
-                  {/*       name="flowRate"*/}
-                  {/*       min="0"*/}
-                  {/*       max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('rinse')}*/}
-                  {/*       placeholder="Flow rate."*/}
-                  {/*       onBlur={() => this.checkFlowRateInput()}*/}
-                  {/*       onChange={(e) => this.handleStateChange('flowRate', 'rinse', e.target.value)}*/}
-                  {/*       required/>*/}
                    <FlowRateInput
                      value={this.state.flowRate['rinse']}
                      max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('rinse')}
                      onChange={(e) => this.handleStateChange('flowRate', 'rinse', e.target.value)}
                      onBlur={() => this.checkFlowRateInput()}
                    />
-                  {/*<Input type="select"*/}
-                  {/*       name="flowUnit"*/}
-                  {/*       defaultValue={this.state.flowUnit['rinse']}*/}
-                  {/*       onBlur={() => this.checkFlowRateInput()}*/}
-                  {/*       onChange={(e) => this.handleStateChange('flowUnit', 'rinse', e.target.value)}>*/}
-                  {/*  <option value="mL/s">mL/s</option>*/}
-                  {/*  <option value="mL/min">mL/min</option>*/}
-                  {/*  <option value="cL/s">cL/s</option>*/}
-                  {/*  <option value="cL/min">cL/min</option>*/}
-                  {/*</Input>*/}
                   <FlowUnitInput defaultValue={this.state.flowUnit['rinse']}
                                  onChange={(e) => this.handleStateChange('flowUnit', 'rinse', e.target.value)}
                                  onBlur={() => this.checkFlowRateInput()}
@@ -1351,65 +1243,24 @@ class PumpForm extends Component {
                 <div className="col-sm input-subform"></div>
 
                 <div className="col-sm input-subform volume-subform">
-                  {/*<Input type="number"*/}
-                  {/*       value={this.state.targetVolume['targetVolume']}*/}
-                  {/*       pattern="\d+((\.)\d+)?"*/}
-                  {/*       step="any"*/}
-                  {/*       name="targetVolume"*/}
-                  {/*       min="0"*/}
-                  {/*       max={this.computeSmallestSyringeVolumeMilliLitres('targetVolume')}*/}
-                  {/*       placeholder="Target volume."*/}
-                  {/*       onChange={(e) => this.handleStateChange('targetVolume', 'targetVolume', e.target.value)}*/}
-                  {/*       onBlur={() => this.checkTargetVolumeInput()}*/}
-                  {/*       required/>*/}
                   <TargetVolumeInput value={this.state.targetVolume['targetVolume']}
                                      max={this.computeSmallestSyringeVolumeMilliLitres('targetVolume')}
                                      onChange={(e) => this.handleStateChange('targetVolume', 'targetVolume', e.target.value)}
                                      onBlur={() => this.checkTargetVolumeInput()}
                   />
-                  {/*<Input type="select"*/}
-                  {/*       name="flowUnit"*/}
-                  {/*       defaultValue={this.state.volumeUnit['targetVolume']}*/}
-                  {/*       onBlur={() => this.checkTargetVolumeInput()}*/}
-                  {/*       onChange={(e) => this.handleStateChange('volumeUnit', 'targetVolume', e.target.value)}>*/}
-                  {/*  <option value="mL">mL</option>*/}
-                  {/*  <option value="cL">cL</option>*/}
-                  {/*</Input>*/}
                   <VolumeUnitInput defaultValue={this.state.volumeUnit['targetVolume']}
                                    onChange={(e) => this.handleStateChange('volumeUnit', 'targetVolume', e.target.value)}
                                    onBlur={() => this.checkTargetVolumeInput()}
                   />
                 </div>
 
-
                 <div className="col-sm input-subform flowrate-subform">
-                  {/*<Input type="number"*/}
-                  {/*       value={this.state.flowRate['targetVolume']}*/}
-                  {/*       pattern="\d+((\.)\d+)?"*/}
-                  {/*       step="any"*/}
-                  {/*       name="flowRate"*/}
-                  {/*       min="0"*/}
-                  {/*       max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('targetVolume')}*/}
-                  {/*       placeholder="Flow rate."*/}
-                  {/*       onChange={(e) => this.handleStateChange('flowRate', 'targetVolume', e.target.value)}*/}
-                  {/*       onBlur={() => this.checkFlowRateInput()}*/}
-                  {/*       required/>*/}
                   <FlowRateInput
                      value={this.state.flowRate['targetVolume']}
                      max={this.computeMaximallyAllowedFlowRateUnitAsSpecifiedInForm('targetVolume')}
                      onChange={(e) => this.handleStateChange('flowRate', 'targetVolume', e.target.value)}
                      onBlur={() => this.checkFlowRateInput()}
                    />
-                  {/*<Input type="select"*/}
-                  {/*       name="flowUnit"*/}
-                  {/*       defaultValue={this.state.flowUnit['targetVolume']}*/}
-                  {/*       onBlur={() => this.checkFlowRateInput()}*/}
-                  {/*       onChange={(e) => this.handleStateChange('flowUnit', 'targetVolume', e.target.value)}>*/}
-                  {/*  <option value="mL/s">mL/s</option>*/}
-                  {/*  <option value="mL/min">mL/min</option>*/}
-                  {/*  <option value="cL/s">cL/s</option>*/}
-                  {/*  <option value="cL/min">cL/min</option>*/}
-                  {/*</Input>*/}
                   <FlowUnitInput defaultValue={this.state.flowUnit['targetVolume']}
                                  onChange={(e) => this.handleStateChange('flowUnit', 'targetVolume', e.target.value)}
                                  onBlur={() => this.checkFlowRateInput()}
