@@ -13,6 +13,8 @@
 - Refactor many parts of the pump form into separate React Components
 - Disable input fields until at least one pump is selected
 - The "Disconnect" button is now displayed in a dangerous red
+- Backend test mode can now be enabled by setting the environment variable
+  `PYQMIX_TEST_MODE`.
 
 2019.1
 ------
