@@ -192,6 +192,7 @@ class PumpForm extends Component {
   };
 
   computeSmallestSyringeVolumeMilliLitres = () => {
+    // Returns the maximum fill volume of the smallest syringe.
     // Syringe volume is always set to mL in this.state.pumps
     if (this.state.selectedPumps.length > 0) {
       let selectedPumps = this.state.pumps.filter((e) => this.state.selectedPumps.includes(e.pump_id));
@@ -207,7 +208,7 @@ class PumpForm extends Component {
     const activeSubform = this.state.activeSubform;
 
     if (this.computeSmallestSyringeVolumeMilliLitres() < this.computeVolumeMilliLitres(this.state)) {
-      console.log('Maximum volume exceeded, setting flow rate to maximum allowed value');
+      console.log('Maximum volume exceeded, setting targetvolume to maximum allowed value');
       let targetVolume = this.computeMaximallyAllowedVolumeUnitAsSpecifiedInForm();
       this.handleStateChange('targetVolume', activeSubform, targetVolume);
     }
@@ -1168,7 +1169,7 @@ class PumpForm extends Component {
 
             /* Target Volume */
                             targetVolume={this.state.targetVolume['targetVolume']}
-                            volumeMax={this.computeSmallestSyringeVolumeMilliLitres('targetVolume')}
+                            targetVolumeMax={this.computeSmallestSyringeVolumeMilliLitres('targetVolume')}
                             onTargetVolumeChange={(e) => this.handleStateChange('targetVolume', 'targetVolume', e.target.value)}
                             checkTargetVolumeInput={this.checkTargetVolumeInput}
 

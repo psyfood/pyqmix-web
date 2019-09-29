@@ -28,7 +28,7 @@ class TargetVolumeForm extends Component {
 
             <div className="col-sm input-subform volume-subform">
               <TargetVolumeInput value={this.props.targetVolume}
-                                 max={this.props.volumeMax}
+                                 max={this.props.targetVolumeMax}
                                  onChange={this.props.onTargetVolumeChange}
                                  onBlur={this.props.checkTargetVolumeInput}
                                  disabled={this.props.disabled}
